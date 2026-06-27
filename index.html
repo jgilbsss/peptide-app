@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Peptides">
+<meta name="theme-color" content="#0b0b0f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon.png">
+<title>Peptides</title>
+<style>
+:root{
+  --bg1:#eef1f7; --bg2:#e3e7f0; --ink:#1c1c1e; --ink2:#3a3a3c; --sec:#8a8a8e;
+  --glass:rgba(255,255,255,.72); --glass-brd:rgba(255,255,255,.6);
+  --card:rgba(255,255,255,.78); --hair:rgba(60,60,67,.13);
+  --pill:rgba(118,118,128,.12); --blue:#0A84FF; --shadow:0 10px 30px rgba(31,38,72,.12);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg1:#0b0b0f; --bg2:#16161c; --ink:#f5f5f7; --ink2:#d8d8de; --sec:#9a9aa2;
+    --glass:rgba(30,30,38,.66); --glass-brd:rgba(255,255,255,.10);
+    --card:rgba(28,28,36,.72); --hair:rgba(255,255,255,.10);
+    --pill:rgba(120,120,130,.24); --shadow:0 12px 34px rgba(0,0,0,.5);
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Segoe UI",Helvetica,Arial,sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(120% 80% at 80% -10%, rgba(10,132,255,.18), transparent 60%),
+    radial-gradient(120% 80% at -10% 10%, rgba(175,82,222,.16), transparent 55%),
+    linear-gradient(180deg,var(--bg1),var(--bg2));
+  background-attachment:fixed;min-height:100vh;display:flex;justify-content:center;-webkit-font-smoothing:antialiased;
+}
+.app{width:100%;max-width:440px;padding:max(14px,env(safe-area-inset-top)) 16px calc(110px + env(safe-area-inset-bottom));position:relative}
+.statusbar{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:600;color:var(--ink2);padding:4px 6px 2px;opacity:.7}
+.h-top{display:flex;justify-content:space-between;align-items:flex-end;margin:8px 4px 14px}
+.h-top .lt{font-size:32px;font-weight:800;letter-spacing:-.02em;line-height:1}
+.h-top .dt{font-size:13px;color:var(--sec);margin-top:5px;font-weight:500}
+.gear{width:38px;height:38px;border-radius:50%;background:var(--pill);border:0;color:var(--ink2);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.gear svg{width:20px;height:20px}
+.glass{background:var(--glass);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);border:1px solid var(--glass-brd);border-radius:26px;box-shadow:var(--shadow)}
+.sec-h{font-size:13px;font-weight:700;color:var(--sec);margin:22px 8px 8px}
+.hero{padding:18px 18px 8px;margin-top:4px}
+.hero .lead{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+.hero .lead .ttl{font-size:20px;font-weight:800;letter-spacing:-.01em}
+.ring{font-size:12px;font-weight:700;color:var(--blue);background:rgba(10,132,255,.12);padding:5px 11px;border-radius:20px}
+.hero .site{font-size:12.5px;color:var(--sec);margin:2px 0 12px;font-weight:500}
+.hero .site b{color:var(--ink2);font-weight:700}
+.row{display:flex;align-items:center;gap:13px;padding:11px 0;border-top:1px solid var(--hair)}
+.row:first-of-type{border-top:0}
+.row .chk{width:25px;height:25px;border-radius:50%;border:2px solid var(--sec);flex:0 0 auto;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
+.row.done .chk{background:var(--blue);border-color:var(--blue)}
+.row .chk svg{opacity:0;transition:.15s}.row.done .chk svg{opacity:1}
+.row.done .nm{text-decoration:line-through;color:var(--sec)}
+.ic{width:34px;height:34px;border-radius:11px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12.5px;letter-spacing:-.02em;box-shadow:0 3px 8px rgba(0,0,0,.18)}
+.row .meta{flex:1;min-width:0}.row .nm{font-size:16px;font-weight:600;line-height:1.2}
+.row .sub{font-size:12.5px;color:var(--sec);margin-top:1px}
+.row .val{font-size:14px;color:var(--ink2);font-weight:600;white-space:nowrap}
+.row.opt .ic{opacity:.9}
+.list{padding:4px 16px}
+.list .grp{font-size:11.5px;font-weight:700;color:var(--sec);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 2px}
+.list .grp:first-child{margin-top:8px}
+.agenda{padding:6px 16px 10px}
+.ag{display:flex;align-items:center;gap:13px;padding:10px 0;border-top:1px solid var(--hair)}
+.ag:first-child{border-top:0}
+.badge{width:46px;height:46px;border-radius:13px;flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--pill)}
+.badge .mo{font-size:9.5px;font-weight:800;color:#FF453A;letter-spacing:.04em;text-transform:uppercase}
+.badge .dy{font-size:18px;font-weight:800;line-height:1;margin-top:1px}
+.ag .nm{font-size:14.5px;font-weight:600;line-height:1.25}.ag .sub{font-size:12px;color:var(--sec);margin-top:1px}
+.cal{padding:14px 16px 18px}
+.seg{display:flex;background:var(--pill);border-radius:11px;padding:3px;margin-bottom:14px}
+.seg button{flex:1;border:0;background:transparent;color:var(--ink2);font-size:13px;font-weight:600;padding:6px 0;border-radius:9px;cursor:pointer;font-family:inherit}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.cal table{width:100%;border-collapse:collapse;table-layout:fixed}
+.cal th{font-size:10.5px;color:var(--sec);font-weight:600;padding-bottom:8px}
+.cal td{height:40px;text-align:center;vertical-align:top;font-size:13px;font-weight:500;color:var(--ink2);position:relative;padding-top:5px}
+.cal td.out{color:transparent}
+.cal td.today .dn{background:var(--blue);color:#fff;border-radius:50%;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center}
+.dots{display:flex;gap:3px;justify-content:center;margin-top:3px;height:5px}
+.dot{width:5px;height:5px;border-radius:50%}
+.dot.r{background:var(--blue)}.dot.e{background:#FF9F0A}.dot.m{background:#30B0C7}
+.legend{display:flex;gap:14px;justify-content:center;margin-top:14px;font-size:11px;color:var(--sec)}
+.legend span{display:inline-flex;align-items:center;gap:5px}.legend i{width:7px;height:7px;border-radius:50%;display:inline-block}
+.tabs{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:408px;display:flex;justify-content:space-around;padding:10px 8px;border-radius:26px;z-index:20}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--sec);border:0;background:transparent;cursor:pointer;font-family:inherit;flex:1}
+.tab.on{color:var(--blue)}.tab svg{width:23px;height:23px}
+.foot{font-size:10.5px;color:var(--sec);text-align:center;margin:18px 8px 0;line-height:1.5}
+.banner{margin:10px 4px 0;padding:11px 14px;border-radius:16px;font-size:12.5px;font-weight:500;display:none}
+.banner.show{display:block}
+.banner.err{background:rgba(255,69,58,.14);color:#FF453A}
+.banner.ok{background:rgba(48,199,89,.14);color:#34C759}
+/* setup modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.overlay.show{display:flex}
+.sheet{width:100%;max-width:400px;padding:22px}
+.sheet h2{margin:0 0 4px;font-size:20px;font-weight:800}
+.sheet p{margin:0 0 16px;font-size:13px;color:var(--sec);line-height:1.5}
+.sheet label{font-size:12px;font-weight:700;color:var(--sec);display:block;margin:12px 0 5px}
+.sheet input{width:100%;padding:12px 14px;border-radius:13px;border:1px solid var(--hair);background:var(--card);color:var(--ink);font-size:15px;font-family:inherit}
+.sheet .btns{display:flex;gap:10px;margin-top:18px}
+.sheet button{flex:1;padding:13px;border-radius:14px;border:0;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+.sheet .save{background:var(--blue);color:#fff}
+.sheet .cancel{background:var(--pill);color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="statusbar"><span id="clock">9:41</span><span style="display:inline-flex;gap:6px;align-items:center">
+    <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></svg>
+    <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="1" y="1" width="21" height="10" rx="3" stroke="currentColor" stroke-opacity="0.4"/><rect x="3" y="3" width="15" height="6" rx="1.5" fill="currentColor"/><rect x="23" y="4" width="1.5" height="4" rx="0.75" fill="currentColor" fill-opacity="0.4"/></svg>
+  </span></div>
+  <div class="h-top">
+    <div><div class="lt">Peptides</div><div class="dt" id="todaydate"></div></div>
+    <button class="gear" id="gear" aria-label="Setup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7H1a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 2.6 7a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 9 2.6h.1A1.6 1.6 0 0 0 11 1a2 2 0 1 1 4 0v.1A1.6 1.6 0 0 0 17 2.6a1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7h.2a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.4 1.1z"/></svg></button>
+  </div>
+
+  <div class="banner" id="banner"></div>
+
+  <div class="glass hero" id="herocard">
+    <div class="lead"><div class="ttl">Today</div><div class="ring" id="ring">–</div></div>
+    <div class="site" id="site"></div>
+    <div id="todaylist"></div>
+  </div>
+
+  <div class="sec-h" id="sec-protocol">Daily Protocol</div>
+  <div class="glass list" id="protocol"></div>
+
+  <div class="sec-h" id="sec-vials">Upcoming Vials</div>
+  <div class="glass agenda" id="agenda"></div>
+
+  <div class="sec-h" id="sec-cal">Calendar</div>
+  <div class="glass cal">
+    <div class="seg" id="seg"></div>
+    <div id="calbody"></div>
+    <div class="legend"><span><i style="background:var(--blue)"></i>Reta</span><span><i style="background:#FF9F0A"></i>Change</span><span><i style="background:#30B0C7"></i>Re-mix</span></div>
+  </div>
+
+  <div class="foot" id="foot">Pulls from your private gist · token stays on this device only</div>
+</div>
+
+<nav class="glass tabs">
+  <button class="tab on" data-go="top"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 3 9v12h6v-7h6v7h6V9z"/></svg>Today</button>
+  <button class="tab" data-go="sec-cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Calendar</button>
+  <button class="tab" data-go="sec-vials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6M10 3v5l-4 9a3 3 0 0 0 3 4h6a3 3 0 0 0 3-4l-4-9V3"/></svg>Vials</button>
+</nav>
+
+<div class="overlay" id="overlay">
+  <div class="glass sheet">
+    <h2>Setup</h2>
+    <p>Paste a GitHub token (gist scope) and your gist ID. These stay only on this device and are used to read your private peptide data.</p>
+    <label>GitHub token</label><input id="in-token" type="password" placeholder="github_pat_…" autocomplete="off">
+    <label>Gist ID</label><input id="in-gist" type="text" placeholder="e.g. a1b2c3d4…" autocomplete="off">
+    <div class="btns"><button class="cancel" id="cancel">Cancel</button><button class="save" id="save">Save &amp; Sync</button></div>
+  </div>
+</div>
+
+<script>
+const pad=n=>String(n).padStart(2,"0");
+const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const LS={get(k,d){try{return localStorage.getItem(k)??d}catch(e){return d}},
+          set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const _now=new Date();const TODAY=iso(_now);
+document.getElementById("clock").textContent=(_now.getHours()%12||12)+":"+pad(_now.getMinutes());
+document.getElementById("todaydate").textContent=DOW[_now.getDay()]+", "+MON[_now.getMonth()]+" "+_now.getDate();
+
+function banner(msg,cls){const b=document.getElementById("banner");b.textContent=msg;b.className="banner show "+cls;
+  if(cls==="ok")setTimeout(()=>b.className="banner",2500);}
+
+/* ---------- gist sync ---------- */
+async function gistPull(){
+  const token=LS.get("pep_token"),gist=LS.get("pep_gist");
+  if(!token||!gist){openSetup();return null;}
+  const r=await fetch("https://api.github.com/gists/"+gist,
+    {headers:{Authorization:"Bearer "+token,Accept:"application/vnd.github+json"}});
+  if(!r.ok)throw new Error("GitHub "+r.status);
+  const g=await r.json();const f=g.files&&g.files["peptidedata.json"];
+  if(!f)throw new Error("peptidedata.json not in gist");
+  const txt=f.truncated?await(await fetch(f.raw_url)).text():f.content;
+  return JSON.parse(txt);
+}
+async function sync(){
+  try{const d=await gistPull();if(d){LS.set("pep_data",JSON.stringify(d));render(d);banner("Updated "+(d.built||""),"ok");}}
+  catch(e){banner("Sync failed: "+e.message+" — showing last saved","err");}
+}
+
+/* ---------- render ---------- */
+const check=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>`;
+const icon=c=>`<div class="ic" style="background:${c.color}">${c.mono}</div>`;
+const val=c=>`${c.units?c.units+"u":""}${c.units&&c.dose?" · ":""}${c.dose||""}`;
+
+function render(D){
+  const COMPOUNDS=D.compounds||[],WEEKLY=D.weekly||{},EVENTS=D.events||{},
+        TIMELINE=D.timeline||[],SITES=D.sites||[],WED=D.wed||[];
+  document.getElementById("foot").innerHTML="Data built "+(D.built||"—")+" · token stays on this device only";
+
+  /* today */
+  const start=new Date(_now.getFullYear(),0,0);
+  const doy=Math.floor((_now-start)/86400000);
+  document.getElementById("site").innerHTML=SITES.length?("Rotate site today: <b>"+SITES[doy%SITES.length]+"</b>"):"";
+  let todays=[];
+  if(WED.includes(TODAY)&&WEEKLY.name)todays.push({...WEEKLY,when:"Morning"});
+  COMPOUNDS.filter(c=>c.group==="midday").forEach(c=>todays.push({...c,when:"Midday · 12:00"}));
+  COMPOUNDS.filter(c=>c.group==="prebed").forEach(c=>todays.push({...c,when:"Pre-bed · 9:30 PM"}));
+  const prn=COMPOUNDS.filter(c=>c.group==="prn");
+  const key="pepdone-"+TODAY;
+  let done=new Set(JSON.parse(LS.get(key,"[]")));
+  const tl=document.getElementById("todaylist");
+  function rt(){
+    tl.innerHTML=todays.map((c,i)=>`<div class="row${done.has(i)?' done':''}" data-i="${i}"><div class="chk">${check}</div>${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">${c.when}${c.note?" · "+c.note:""}</div></div><div class="val">${val(c)}</div></div>`).join("")
+      +prn.map(c=>`<div class="row opt">${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">As needed · ${c.dose}</div></div><div class="val">PRN</div></div>`).join("");
+    document.getElementById("ring").textContent=done.size+"/"+todays.length;
+    tl.querySelectorAll(".row[data-i]").forEach(r=>r.onclick=()=>{const i=+r.dataset.i;done.has(i)?done.delete(i):done.add(i);LS.set(key,JSON.stringify([...done]));rt();});
+  }
+  rt();
+
+  /* protocol */
+  const groups=[["Midday","midday"],["Pre-bed","prebed"],["As needed","prn"],["Weekly","weekly"]];
+  const allc=[...COMPOUNDS,WEEKLY];
+  document.getElementById("protocol").innerHTML=groups.map(([lbl,g])=>{
+    const items=allc.filter(c=>c.group===g);if(!items.length)return"";
+    return `<div class="grp">${lbl}</div>`+items.map(c=>`<div class="row">${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">${c.time||""}${c.note?" · "+c.note:""}</div></div><div class="val">${val(c)}</div></div>`).join("");
+  }).join("");
+
+  /* agenda */
+  const up=TIMELINE.filter(t=>t.d>=TODAY).slice(0,7);
+  document.getElementById("agenda").innerHTML=(up.length?up:TIMELINE.slice(-3)).map(t=>{
+    const d=new Date(t.d+"T00:00:00");const parts=t.label.split(" — ");
+    return `<div class="ag"><div class="badge"><div class="mo">${MON[d.getMonth()]}</div><div class="dy">${d.getDate()}</div></div><div class="meta"><div class="nm">${parts[0]}</div><div class="sub">${parts[1]||"re-mix"}</div></div></div>`;
+  }).join("")||'<div class="ag"><div class="meta"><div class="sub">No upcoming items</div></div></div>';
+
+  /* calendar */
+  const months=[["June",2026,5],["July",2026,6],["August",2026,7]];
+  const remix=new Set(TIMELINE.map(t=>t.d));
+  let cur=(_now.getMonth()>=5&&_now.getMonth()<=7)?_now.getMonth()-5:0;
+  const seg=document.getElementById("seg");
+  seg.innerHTML=months.map((m,i)=>`<button class="${i===cur?'on':''}" data-m="${i}">${m[0].slice(0,3)}</button>`).join("");
+  seg.querySelectorAll("button").forEach(b=>b.onclick=()=>{cur=+b.dataset.m;draw();});
+  function draw(){
+    seg.querySelectorAll("button").forEach((b,i)=>b.classList.toggle("on",i===cur));
+    const [,y,m]=months[cur];const first=new Date(y,m,1),lead=first.getDay(),days=new Date(y,m+1,0).getDate();
+    let h="<table><thead><tr>"+DOW.map(d=>`<th>${d[0]}</th>`).join("")+"</tr></thead><tbody><tr>";let col=0;
+    for(let i=0;i<lead;i++){h+="<td class='out'>.</td>";col++;}
+    for(let dn=1;dn<=days;dn++){if(col===7){h+="</tr><tr>";col=0;}
+      const k=`${y}-${pad(m+1)}-${pad(dn)}`;const e=EVENTS[k];let dots="";
+      if(e&&e.reta)dots+="<span class='dot r'></span>";if(e&&e.evt)dots+="<span class='dot e'></span>";if(remix.has(k))dots+="<span class='dot m'></span>";
+      h+=`<td class="${k===TODAY?'today':''}"><span class="dn">${dn}</span><div class="dots">${dots}</div></td>`;col++;}
+    while(col<7){h+="<td class='out'>.</td>";col++;}h+="</tr></tbody></table>";
+    document.getElementById("calbody").innerHTML=h;
+  }
+  draw();
+}
+
+/* ---------- setup ---------- */
+function openSetup(){document.getElementById("in-token").value=LS.get("pep_token","");document.getElementById("in-gist").value=LS.get("pep_gist","");document.getElementById("overlay").classList.add("show");}
+document.getElementById("gear").onclick=openSetup;
+document.getElementById("cancel").onclick=()=>document.getElementById("overlay").classList.remove("show");
+document.getElementById("save").onclick=()=>{LS.set("pep_token",document.getElementById("in-token").value.trim());LS.set("pep_gist",document.getElementById("in-gist").value.trim());document.getElementById("overlay").classList.remove("show");sync();};
+
+/* tabs */
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));t.classList.add("on");
+  if(t.dataset.go==="top")window.scrollTo({top:0,behavior:"smooth"});else document.getElementById(t.dataset.go).scrollIntoView({behavior:"smooth",block:"start"});});
+
+/* boot: cached first, then refresh */
+const cached=LS.get("pep_data");
+if(cached){try{render(JSON.parse(cached));}catch(e){}}
+sync();
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
