@@ -15,7 +15,8 @@
   --bg1:#eef1f7; --bg2:#e3e7f0; --ink:#1c1c1e; --ink2:#3a3a3c; --sec:#8a8a8e;
   --glass:rgba(255,255,255,.72); --glass-brd:rgba(255,255,255,.6);
   --card:rgba(255,255,255,.78); --hair:rgba(60,60,67,.13);
-  --pill:rgba(118,118,128,.12); --blue:#0A84FF; --shadow:0 10px 30px rgba(31,38,72,.12);
+  --pill:rgba(118,118,128,.12); --blue:#0A84FF; --green:#34C759; --amber:#FF9F0A;
+  --shadow:0 10px 30px rgba(31,38,72,.12);
 }
 @media (prefers-color-scheme: dark){
   :root{
@@ -27,17 +28,10 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0}
-body{
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Segoe UI",Helvetica,Arial,sans-serif;
-  color:var(--ink);
-  background:
-    radial-gradient(120% 80% at 80% -10%, rgba(10,132,255,.18), transparent 60%),
-    radial-gradient(120% 80% at -10% 10%, rgba(175,82,222,.16), transparent 55%),
-    linear-gradient(180deg,var(--bg1),var(--bg2));
-  background-attachment:fixed;min-height:100vh;display:flex;justify-content:center;-webkit-font-smoothing:antialiased;
-}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Segoe UI",Helvetica,Arial,sans-serif;color:var(--ink);
+  background:radial-gradient(120% 80% at 80% -10%, rgba(10,132,255,.18), transparent 60%),radial-gradient(120% 80% at -10% 10%, rgba(175,82,222,.16), transparent 55%),linear-gradient(180deg,var(--bg1),var(--bg2));
+  background-attachment:fixed;min-height:100vh;display:flex;justify-content:center;-webkit-font-smoothing:antialiased;}
 .app{width:100%;max-width:440px;padding:max(14px,env(safe-area-inset-top)) 16px calc(110px + env(safe-area-inset-bottom));position:relative}
-.statusbar{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:600;color:var(--ink2);padding:4px 6px 2px;opacity:.7}
 .h-top{display:flex;justify-content:space-between;align-items:flex-end;margin:8px 4px 14px}
 .h-top .lt{font-size:32px;font-weight:800;letter-spacing:-.02em;line-height:1}
 .h-top .dt{font-size:13px;color:var(--sec);margin-top:5px;font-weight:500}
@@ -45,12 +39,24 @@ body{
 .gear svg{width:20px;height:20px}
 .glass{background:var(--glass);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);border:1px solid var(--glass-brd);border-radius:26px;box-shadow:var(--shadow)}
 .sec-h{font-size:13px;font-weight:700;color:var(--sec);margin:22px 8px 8px}
-.hero{padding:18px 18px 8px;margin-top:4px}
-.hero .lead{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
-.hero .lead .ttl{font-size:20px;font-weight:800;letter-spacing:-.01em}
-.ring{font-size:12px;font-weight:700;color:var(--blue);background:rgba(10,132,255,.12);padding:5px 11px;border-radius:20px}
-.hero .site{font-size:12.5px;color:var(--sec);margin:2px 0 12px;font-weight:500}
-.hero .site b{color:var(--ink2);font-weight:700}
+/* hero */
+.hero{padding:18px;margin-top:4px}
+.herotop{display:flex;gap:16px;align-items:center;margin-bottom:8px}
+.ringwrap{position:relative;width:66px;height:66px;flex:0 0 auto}
+.ring-svg{width:66px;height:66px;transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:var(--pill);stroke-width:6}
+.ring-fg{fill:none;stroke:var(--blue);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .45s cubic-bezier(.4,0,.2,1)}
+.ring-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800}
+.herometa{flex:1;min-width:0}
+.herometa .ttl{font-size:20px;font-weight:800;letter-spacing:-.01em}
+.streak{font-size:13px;font-weight:700;color:var(--amber);margin-top:3px}
+.streak.none{color:var(--sec);font-weight:600}
+.week{display:flex;gap:5px;margin-top:9px}
+.wk{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:9px;color:var(--sec);flex:1}
+.wk .d{width:10px;height:10px;border-radius:50%;background:var(--pill)}
+.wk.full .d{background:var(--green)} .wk.part .d{background:var(--amber)}
+.wk.today .d{outline:2px solid var(--blue);outline-offset:1px}
+/* dose row */
 .row{display:flex;align-items:center;gap:13px;padding:11px 0;border-top:1px solid var(--hair)}
 .row:first-of-type{border-top:0}
 .row .chk{width:25px;height:25px;border-radius:50%;border:2px solid var(--sec);flex:0 0 auto;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
@@ -64,9 +70,21 @@ body{
 .row .sub{font-size:12.5px;color:var(--sec);margin-top:1px}
 .row .val{font-size:14px;color:var(--ink2);font-weight:600;white-space:nowrap}
 .row.opt .ic{opacity:.9}
+/* grouped list */
 .list{padding:4px 16px}
 .list .grp{font-size:11.5px;font-weight:700;color:var(--sec);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 2px}
 .list .grp:first-child{margin-top:8px}
+/* site map */
+.site-card{padding:16px;display:flex;gap:16px;align-items:center}
+.bodymap{width:124px;height:172px;flex:0 0 auto}
+.body{fill:var(--pill);stroke:var(--hair);stroke-width:1.5}
+.zone{fill:rgba(10,132,255,.20);stroke:var(--blue);stroke-width:1.5;cursor:pointer;transition:.15s}
+.zone.used{fill:var(--blue)}
+.zone.sug{stroke:var(--amber);stroke-width:3}
+.site-info{flex:1;font-size:13.5px}
+#site-sug b{color:var(--amber)}
+.site-sub{color:var(--sec);font-size:12px;margin-top:6px;line-height:1.5}
+/* agenda */
 .agenda{padding:6px 16px 10px}
 .ag{display:flex;align-items:center;gap:13px;padding:10px 0;border-top:1px solid var(--hair)}
 .ag:first-child{border-top:0}
@@ -75,62 +93,87 @@ body{
 .badge .dy{font-size:18px;font-weight:800;line-height:1;margin-top:1px}
 .ag .nm{font-size:14.5px;font-weight:600;line-height:1.25}.ag .sub{font-size:12px;color:var(--sec);margin-top:1px}
 .chip2{font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:20px;white-space:nowrap;align-self:center}
-.chip2.g{background:rgba(52,199,89,.16);color:#34C759}
-.chip2.a{background:rgba(255,159,10,.18);color:#FF9F0A}
+.chip2.g{background:rgba(52,199,89,.16);color:var(--green)}
+.chip2.a{background:rgba(255,159,10,.18);color:var(--amber)}
 .chip2.r{background:rgba(255,69,58,.18);color:#FF453A}
 .chip2.n{background:var(--pill);color:var(--sec)}
 .row.arch{opacity:.5}
+/* calculator */
+.calc{padding:14px 16px}
+.calc-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--hair)}
+.calc-row label{font-size:14px;font-weight:600}
+.calc-row input{width:108px;padding:9px 11px;border-radius:11px;border:1px solid var(--hair);background:var(--card);color:var(--ink);font-size:15px;font-family:inherit;text-align:right}
+.calc-out{margin-top:13px;font-size:13.5px;line-height:1.8;color:var(--ink2)}
+.calc-out b{color:var(--ink);font-size:16px}
+/* calendar */
 .cal{padding:14px 16px 18px}
 .seg{display:flex;background:var(--pill);border-radius:11px;padding:3px;margin-bottom:14px}
 .seg button{flex:1;border:0;background:transparent;color:var(--ink2);font-size:13px;font-weight:600;padding:6px 0;border-radius:9px;cursor:pointer;font-family:inherit}
 .seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12)}
 .cal table{width:100%;border-collapse:collapse;table-layout:fixed}
 .cal th{font-size:10.5px;color:var(--sec);font-weight:600;padding-bottom:8px}
-.cal td{height:40px;text-align:center;vertical-align:top;font-size:13px;font-weight:500;color:var(--ink2);position:relative;padding-top:5px}
+.cal td{height:42px;text-align:center;vertical-align:top;font-size:13px;font-weight:500;color:var(--ink2);position:relative;padding-top:5px}
 .cal td.out{color:transparent}
-.cal td.today .dn{background:var(--blue);color:#fff;border-radius:50%;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center}
+.cal td .dn{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%}
+.cal td.today .dn{background:var(--blue);color:#fff}
+.cal td.logged .dn{box-shadow:0 0 0 2px var(--green)}
+.cal td.today.logged .dn{box-shadow:none}
 .dots{display:flex;gap:3px;justify-content:center;margin-top:3px;height:5px}
 .dot{width:5px;height:5px;border-radius:50%}
 .dot.r{background:var(--blue)}.dot.e{background:#FF9F0A}.dot.m{background:#30B0C7}
-.legend{display:flex;gap:14px;justify-content:center;margin-top:14px;font-size:11px;color:var(--sec)}
+.legend{display:flex;gap:13px;justify-content:center;flex-wrap:wrap;margin-top:14px;font-size:11px;color:var(--sec)}
 .legend span{display:inline-flex;align-items:center;gap:5px}.legend i{width:7px;height:7px;border-radius:50%;display:inline-block}
+.legend i.ring{background:transparent;box-shadow:0 0 0 2px var(--green)}
+/* tabs */
 .tabs{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:408px;display:flex;justify-content:space-around;padding:10px 8px;border-radius:26px;z-index:20}
 .tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--sec);border:0;background:transparent;cursor:pointer;font-family:inherit;flex:1}
 .tab.on{color:var(--blue)}.tab svg{width:23px;height:23px}
 .foot{font-size:10.5px;color:var(--sec);text-align:center;margin:18px 8px 0;line-height:1.5}
 .banner{margin:10px 4px 0;padding:11px 14px;border-radius:16px;font-size:12.5px;font-weight:500;display:none}
-.banner.show{display:block}
-.banner.err{background:rgba(255,69,58,.14);color:#FF453A}
-.banner.ok{background:rgba(48,199,89,.14);color:#34C759}
-/* setup modal */
+.banner.show{display:block}.banner.err{background:rgba(255,69,58,.14);color:#FF453A}.banner.ok{background:rgba(52,199,89,.14);color:var(--green)}
+/* setup */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
 .overlay.show{display:flex}
 .sheet{width:100%;max-width:400px;padding:22px}
-.sheet h2{margin:0 0 4px;font-size:20px;font-weight:800}
-.sheet p{margin:0 0 16px;font-size:13px;color:var(--sec);line-height:1.5}
+.sheet h2{margin:0 0 4px;font-size:20px;font-weight:800}.sheet p{margin:0 0 16px;font-size:13px;color:var(--sec);line-height:1.5}
 .sheet label{font-size:12px;font-weight:700;color:var(--sec);display:block;margin:12px 0 5px}
 .sheet input{width:100%;padding:12px 14px;border-radius:13px;border:1px solid var(--hair);background:var(--card);color:var(--ink);font-size:15px;font-family:inherit}
 .sheet .btns{display:flex;gap:10px;margin-top:18px}
 .sheet button{flex:1;padding:13px;border-radius:14px;border:0;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
-.sheet .save{background:var(--blue);color:#fff}
-.sheet .cancel{background:var(--pill);color:var(--ink)}
+.sheet .save{background:var(--blue);color:#fff}.sheet .cancel{background:var(--pill);color:var(--ink)}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="h-top">
     <div><div class="lt">Peptides</div><div class="dt" id="todaydate"></div></div>
-    <button class="gear" id="gear" aria-label="Setup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7H1a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 2.6 7a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 9 2.6h.1A1.6 1.6 0 0 0 11 1a2 2 0 1 1 4 0v.1A1.6 1.6 0 0 0 17 2.6a1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7h.2a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.4 1.1z"/></svg></button>
+    <button class="gear" id="gear" aria-label="Setup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 1.1-2.7H1a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 2.6 7a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 9 2.6h.1A1.6 1.6 0 0 0 11 1a2 2 0 1 1 4 0v.1A1.6 1.6 0 0 0 17 2.6a1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7h.2a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.4 1.1z"/></svg></button>
   </div>
-
   <div class="banner" id="banner"></div>
 
   <div class="view" id="v-today">
-    <div class="glass hero" id="herocard">
-      <div class="lead"><div class="ttl">Today</div><div class="ring" id="ring">–</div></div>
-      <div class="site" id="site"></div>
+    <div class="glass hero">
+      <div class="herotop">
+        <div class="ringwrap"><svg class="ring-svg" viewBox="0 0 66 66"><circle class="ring-bg" cx="33" cy="33" r="28"/><circle class="ring-fg" id="ringfg" cx="33" cy="33" r="28"/></svg><div class="ring-num" id="ringnum">0/0</div></div>
+        <div class="herometa"><div class="ttl">Today</div><div class="streak" id="streak"></div><div class="week" id="week"></div></div>
+      </div>
       <div id="todaylist"></div>
     </div>
+
+    <div class="sec-h">Injection Site</div>
+    <div class="glass site-card">
+      <svg class="bodymap" id="bodymap" viewBox="0 0 200 260">
+        <circle class="body" cx="100" cy="30" r="20"/>
+        <rect class="body" x="58" y="52" width="84" height="100" rx="22"/>
+        <rect class="body" x="34" y="58" width="18" height="74" rx="9"/>
+        <rect class="body" x="148" y="58" width="18" height="74" rx="9"/>
+        <rect class="body" x="64" y="150" width="32" height="98" rx="15"/>
+        <rect class="body" x="104" y="150" width="32" height="98" rx="15"/>
+        <g id="zones"></g>
+      </svg>
+      <div class="site-info"><div id="site-sug"></div><div class="site-sub" id="site-today"></div></div>
+    </div>
+
     <div class="sec-h">Daily Protocol</div>
     <div class="glass list" id="protocol"></div>
   </div>
@@ -140,7 +183,7 @@ body{
     <div class="glass cal">
       <div class="seg" id="seg"></div>
       <div id="calbody"></div>
-      <div class="legend"><span><i style="background:var(--blue)"></i>Reta</span><span><i style="background:#FF9F0A"></i>Change</span><span><i style="background:#30B0C7"></i>Re-mix</span></div>
+      <div class="legend"><span><i style="background:var(--blue)"></i>Reta</span><span><i style="background:#FF9F0A"></i>Change</span><span><i style="background:#30B0C7"></i>Re-mix</span><span><i class="ring"></i>Logged</span></div>
     </div>
   </div>
 
@@ -149,9 +192,16 @@ body{
     <div class="glass agenda" id="agenda"></div>
     <div class="sec-h">Inventory</div>
     <div class="glass list" id="inventory"></div>
+    <div class="sec-h">Reconstitution Calculator</div>
+    <div class="glass calc">
+      <div class="calc-row"><label>Vial size (mg)</label><input id="c-mg" type="number" inputmode="decimal" value="10"></div>
+      <div class="calc-row"><label>BAC water (mL)</label><input id="c-ml" type="number" inputmode="decimal" value="2"></div>
+      <div class="calc-row"><label>Target dose (mcg)</label><input id="c-dose" type="number" inputmode="decimal" value="250"></div>
+      <div class="calc-out" id="c-out"></div>
+    </div>
   </div>
 
-  <div class="foot" id="foot">Pulls from your private gist · token stays on this device only</div>
+  <div class="foot" id="foot"></div>
 </div>
 
 <nav class="glass tabs">
@@ -160,76 +210,64 @@ body{
   <button class="tab" data-v="v-vials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6M10 3v5l-4 9a3 3 0 0 0 3 4h6a3 3 0 0 0 3-4l-4-9V3"/></svg>Vials</button>
 </nav>
 
-<div class="overlay" id="overlay">
-  <div class="glass sheet">
-    <h2>Setup</h2>
-    <p>Your data loads automatically from your private gist. A token is optional — only add one if you want authenticated requests. Everything stays on this device.</p>
-    <label>Gist ID</label><input id="in-gist" type="text" placeholder="e.g. a1b2c3d4…" autocomplete="off">
-    <label>GitHub token (optional)</label><input id="in-token" type="password" placeholder="leave blank if unsure" autocomplete="off">
-    <div class="btns"><button class="cancel" id="cancel">Cancel</button><button class="save" id="save">Save &amp; Sync</button></div>
-  </div>
-</div>
+<div class="overlay" id="overlay"><div class="glass sheet">
+  <h2>Setup</h2>
+  <p>Your data loads automatically from your private gist. A token is optional. Everything stays on this device.</p>
+  <label>Gist ID</label><input id="in-gist" type="text" placeholder="e.g. a1b2c3d4…" autocomplete="off">
+  <label>GitHub token (optional)</label><input id="in-token" type="password" placeholder="leave blank if unsure" autocomplete="off">
+  <div class="btns"><button class="cancel" id="cancel">Cancel</button><button class="save" id="save">Save &amp; Sync</button></div>
+</div></div>
 
 <script>
 const pad=n=>String(n).padStart(2,"0");
 const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-const LS={get(k,d){try{return localStorage.getItem(k)??d}catch(e){return d}},
-          set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const LS={get(k,d){try{return localStorage.getItem(k)??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 const _now=new Date();const TODAY=iso(_now);
 document.getElementById("todaydate").textContent=DOW[_now.getDay()]+", "+MON[_now.getMonth()]+" "+_now.getDate();
+function banner(m,c){const b=document.getElementById("banner");b.textContent=m;b.className="banner show "+c;if(c==="ok")setTimeout(()=>b.className="banner",2200);}
 
-function banner(msg,cls){const b=document.getElementById("banner");b.textContent=msg;b.className="banner show "+cls;
-  if(cls==="ok")setTimeout(()=>b.className="banner",2500);}
+/* local logs */
+const jget=(k)=>{try{return JSON.parse(LS.get(k,"{}"))}catch(e){return {}}};
+const jset=(k,o)=>LS.set(k,JSON.stringify(o));
+const DAYLOG="pep_daylog", SITELOG="pep_sitelog";
 
-/* ---------- gist sync ---------- */
+/* gist sync (token optional) */
 async function gistPull(){
   const token=LS.get("pep_token"),gist=LS.get("pep_gist");
   if(!gist){openSetup();return null;}
   const headers={Accept:"application/vnd.github+json"};
-  if(token)headers.Authorization="Bearer "+token;   // optional; secret gist reads without it
+  if(token)headers.Authorization="Bearer "+token;
   const r=await fetch("https://api.github.com/gists/"+gist+"?t="+Date.now(),{headers,cache:"no-store"});
   if(!r.ok)throw new Error("GitHub "+r.status);
   const g=await r.json();const f=g.files&&g.files["peptidedata.json"];
   if(!f)throw new Error("peptidedata.json not in gist");
-  const txt=f.truncated?await(await fetch(f.raw_url)).text():f.content;
-  return JSON.parse(txt);
+  return JSON.parse(f.truncated?await(await fetch(f.raw_url)).text():f.content);
 }
 async function sync(){
   try{const d=await gistPull();if(d){LS.set("pep_data",JSON.stringify(d));render(d);banner("Updated "+(d.built||""),"ok");}}
   catch(e){banner("Sync failed: "+e.message+" — showing last saved","err");}
 }
 
-/* ---------- render ---------- */
 const check=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>`;
 const icon=c=>`<div class="ic" style="background:${c.color}"><span class="mn">${c.mono}</span>${c.units?`<span class="un">${c.units}u</span>`:""}</div>`;
 const val=c=>c.dose||"";
 
-function render(D){
-  const COMPOUNDS=D.compounds||[],WEEKLY=D.weekly||{},EVENTS=D.events||{},
-        TIMELINE=D.timeline||[],SITES=D.sites||[],WED=D.wed||[];
-  document.getElementById("foot").innerHTML="Data built "+(D.built||"—")+" · token stays on this device only";
+let DATA=null, todays=[];
 
-  /* today */
-  const start=new Date(_now.getFullYear(),0,0);
-  const doy=Math.floor((_now-start)/86400000);
-  document.getElementById("site").innerHTML=SITES.length?("Rotate site today: <b>"+SITES[doy%SITES.length]+"</b>"):"";
-  let todays=[];
+function render(D){
+  DATA=D;
+  const COMPOUNDS=D.compounds||[],WEEKLY=D.weekly||{},EVENTS=D.events||{},TIMELINE=D.timeline||[],SITES=D.sites||[],WED=D.wed||[],INV=D.inventory||{active:[],powder:[],discarded:[]};
+  document.getElementById("foot").innerHTML="Data built "+(D.built||"—")+" · logs &amp; sites saved on this device";
+
+  /* today's doses (injectables, excl PRN) */
+  todays=[];
   if(WED.includes(TODAY)&&WEEKLY.name)todays.push({...WEEKLY,when:"Morning"});
   COMPOUNDS.filter(c=>c.group==="midday").forEach(c=>todays.push({...c,when:"Midday · 12:00"}));
   COMPOUNDS.filter(c=>c.group==="prebed").forEach(c=>todays.push({...c,when:"Pre-bed · 9:30 PM"}));
   const prn=COMPOUNDS.filter(c=>c.group==="prn");
-  const key="pepdone-"+TODAY;
-  let done=new Set(JSON.parse(LS.get(key,"[]")));
-  const tl=document.getElementById("todaylist");
-  function rt(){
-    tl.innerHTML=todays.map((c,i)=>`<div class="row${done.has(i)?' done':''}" data-i="${i}"><div class="chk">${check}</div>${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">${c.when}${c.note?" · "+c.note:""}</div></div><div class="val">${val(c)}</div></div>`).join("")
-      +prn.map(c=>`<div class="row opt">${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">As needed · ${c.dose}</div></div><div class="val">PRN</div></div>`).join("");
-    document.getElementById("ring").textContent=done.size+"/"+todays.length;
-    tl.querySelectorAll(".row[data-i]").forEach(r=>r.onclick=()=>{const i=+r.dataset.i;done.has(i)?done.delete(i):done.add(i);LS.set(key,JSON.stringify([...done]));rt();});
-  }
-  rt();
+  renderToday(prn);
 
   /* protocol */
   const groups=[["Midday","midday"],["Pre-bed","prebed"],["As needed","prn"],["Weekly","weekly"]];
@@ -239,15 +277,17 @@ function render(D){
     return `<div class="grp">${lbl}</div>`+items.map(c=>`<div class="row">${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">${c.time||""}${c.note?" · "+c.note:""}</div></div><div class="val">${val(c)}</div></div>`).join("");
   }).join("");
 
+  /* site map */
+  renderSites(SITES);
+
   /* agenda */
   const up=TIMELINE.filter(t=>t.d>=TODAY).slice(0,7);
   document.getElementById("agenda").innerHTML=(up.length?up:TIMELINE.slice(-3)).map(t=>{
-    const d=new Date(t.d+"T00:00:00");const parts=t.label.split(" — ");
-    return `<div class="ag"><div class="badge"><div class="mo">${MON[d.getMonth()]}</div><div class="dy">${d.getDate()}</div></div><div class="meta"><div class="nm">${parts[0]}</div><div class="sub">${parts[1]||"re-mix"}</div></div></div>`;
+    const d=new Date(t.d+"T00:00:00");const p=t.label.split(" — ");
+    return `<div class="ag"><div class="badge"><div class="mo">${MON[d.getMonth()]}</div><div class="dy">${d.getDate()}</div></div><div class="meta"><div class="nm">${p[0]}</div><div class="sub">${p[1]||"re-mix"}</div></div></div>`;
   }).join("")||'<div class="ag"><div class="meta"><div class="sub">No upcoming items</div></div></div>';
 
   /* inventory */
-  const INV=D.inventory||{active:[],powder:[],discarded:[]};
   const invRow=(c,tr)=>`<div class="row">${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">${c.line2||""}</div></div>${tr}</div>`;
   let ih="";
   if(INV.active.length)ih+=`<div class="grp">Active</div>`+INV.active.map(c=>invRow(c,`<div class="chip2 ${c.tone}">${c.chip}</div>`)).join("");
@@ -255,49 +295,124 @@ function render(D){
   if(INV.discarded.length)ih+=`<div class="grp">Archive</div>`+INV.discarded.map(c=>`<div class="row arch">${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">Discarded</div></div></div>`).join("");
   document.getElementById("inventory").innerHTML=ih||'<div class="row"><div class="meta"><div class="sub">No inventory</div></div></div>';
 
-  /* calendar */
-  const months=[["June",2026,5],["July",2026,6],["August",2026,7]];
-  const remix=new Set(TIMELINE.map(t=>t.d));
-  let cur=(_now.getMonth()>=5&&_now.getMonth()<=7)?_now.getMonth()-5:0;
-  const seg=document.getElementById("seg");
-  seg.innerHTML=months.map((m,i)=>`<button class="${i===cur?'on':''}" data-m="${i}">${m[0].slice(0,3)}</button>`).join("");
-  seg.querySelectorAll("button").forEach(b=>b.onclick=()=>{cur=+b.dataset.m;draw();});
-  function draw(){
-    seg.querySelectorAll("button").forEach((b,i)=>b.classList.toggle("on",i===cur));
-    const [,y,m]=months[cur];const first=new Date(y,m,1),lead=first.getDay(),days=new Date(y,m+1,0).getDate();
-    let h="<table><thead><tr>"+DOW.map(d=>`<th>${d[0]}</th>`).join("")+"</tr></thead><tbody><tr>";let col=0;
-    for(let i=0;i<lead;i++){h+="<td class='out'>.</td>";col++;}
-    for(let dn=1;dn<=days;dn++){if(col===7){h+="</tr><tr>";col=0;}
-      const k=`${y}-${pad(m+1)}-${pad(dn)}`;const e=EVENTS[k];let dots="";
-      if(e&&e.reta)dots+="<span class='dot r'></span>";if(e&&e.evt)dots+="<span class='dot e'></span>";if(remix.has(k))dots+="<span class='dot m'></span>";
-      h+=`<td class="${k===TODAY?'today':''}"><span class="dn">${dn}</span><div class="dots">${dots}</div></td>`;col++;}
-    while(col<7){h+="<td class='out'>.</td>";col++;}h+="</tr></tbody></table>";
-    document.getElementById("calbody").innerHTML=h;
-  }
-  draw();
+  buildCalendar(EVENTS,TIMELINE);
 }
 
-/* ---------- setup ---------- */
+/* ---- Today: doses + ring + streak + week ---- */
+function renderToday(prn){
+  const dl=jget(DAYLOG);const e=dl[TODAY]||{done:[]};
+  const done=new Set(e.done||[]);
+  const tl=document.getElementById("todaylist");
+  tl.innerHTML=todays.map((c,i)=>`<div class="row${done.has(i)?' done':''}" data-i="${i}"><div class="chk">${check}</div>${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">${c.when}${c.note?" · "+c.note:""}</div></div><div class="val">${val(c)}</div></div>`).join("")
+    +(prn||[]).map(c=>`<div class="row opt">${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">As needed · ${c.dose}</div></div><div class="val">PRN</div></div>`).join("");
+  tl.querySelectorAll(".row[data-i]").forEach(r=>r.onclick=()=>{
+    const i=+r.dataset.i, dl=jget(DAYLOG), s=new Set((dl[TODAY]||{}).done||[]);
+    s.has(i)?s.delete(i):s.add(i);
+    dl[TODAY]={done:[...s],total:todays.length,complete:[...s].length>=todays.length&&todays.length>0};
+    jset(DAYLOG,dl);
+    r.classList.toggle("done");
+    updateStats();
+  });
+  updateStats();
+}
+function updateStats(){
+  const dl=jget(DAYLOG);const e=dl[TODAY]||{done:[]};
+  const total=todays.length, done=(e.done||[]).length;
+  const circ=2*Math.PI*28;
+  document.getElementById("ringfg").style.strokeDasharray=circ;
+  document.getElementById("ringfg").style.strokeDashoffset=circ*(1-(total?done/total:0));
+  document.getElementById("ringnum").textContent=done+"/"+total;
+  // streak
+  let s=0;const cur=new Date(_now);
+  const tk=iso(cur);
+  if(!(dl[tk]&&dl[tk].complete))cur.setDate(cur.getDate()-1);
+  while(true){const k=iso(cur);if(dl[k]&&dl[k].complete){s++;cur.setDate(cur.getDate()-1);}else break;}
+  const se=document.getElementById("streak");
+  se.className="streak"+(s?"":" none");
+  se.textContent=s?`🔥 ${s}-day streak`:"Start your streak today";
+  // week strip
+  const wk=document.getElementById("week");let h="";
+  for(let i=6;i>=0;i--){const d=new Date(_now);d.setDate(d.getDate()-i);const k=iso(d);const en=dl[k];
+    let cls="";if(en&&en.complete)cls="full";else if(en&&(en.done||[]).length)cls="part";
+    if(k===TODAY)cls+=" today";
+    h+=`<div class="wk ${cls}"><div class="d"></div>${DOW[d.getDay()][0]}</div>`;}
+  wk.innerHTML=h;
+}
+
+/* ---- Injection site map ---- */
+const ZPOS=[[82,118],[118,118],[64,104],[136,104],[82,190],[118,190]];
+function renderSites(SITES){
+  const sl=jget(SITELOG);const todayUsed=new Set(sl[TODAY]||[]);
+  // suggestion: least-recently-used zone
+  const last={};Object.keys(sl).sort().forEach(d=>(sl[d]||[]).forEach(z=>last[z]=d));
+  let sug=0,best="9999";
+  for(let i=0;i<SITES.length;i++){const lu=last[i]!==undefined?last[i]:"0000";if(lu<best){best=lu;sug=i;}}
+  const g=document.getElementById("zones");
+  g.innerHTML=SITES.map((s,i)=>`<circle class="zone${todayUsed.has(i)?' used':''}${i===sug?' sug':''}" data-z="${i}" cx="${ZPOS[i][0]}" cy="${ZPOS[i][1]}" r="13"/>`).join("");
+  g.querySelectorAll(".zone").forEach(z=>z.onclick=()=>{
+    const i=+z.dataset.z, sl=jget(SITELOG), arr=new Set(sl[TODAY]||[]);
+    arr.has(i)?arr.delete(i):arr.add(i);
+    sl[TODAY]=[...arr];jset(SITELOG,sl);renderSites(SITES);
+  });
+  document.getElementById("site-sug").innerHTML=`Suggested next: <b>${SITES[sug]||"—"}</b>`;
+  const used=[...todayUsed].map(i=>SITES[i]).join(", ");
+  document.getElementById("site-today").textContent=used?("Logged today: "+used):"Tap a spot to log where you injected.";
+}
+
+/* ---- Calendar with logged-day history ---- */
+let CAL_EVENTS={},CAL_REMIX=new Set(),cur=0;
+const months=[["June",2026,5],["July",2026,6],["August",2026,7]];
+function buildCalendar(EVENTS,TIMELINE){
+  CAL_EVENTS=EVENTS;CAL_REMIX=new Set(TIMELINE.map(t=>t.d));
+  cur=(_now.getMonth()>=5&&_now.getMonth()<=7)?_now.getMonth()-5:0;
+  const seg=document.getElementById("seg");
+  seg.innerHTML=months.map((m,i)=>`<button class="${i===cur?'on':''}" data-m="${i}">${m[0].slice(0,3)}</button>`).join("");
+  seg.querySelectorAll("button").forEach(b=>b.onclick=()=>{cur=+b.dataset.m;drawCal();});
+  drawCal();
+}
+function drawCal(){
+  document.querySelectorAll("#seg button").forEach((b,i)=>b.classList.toggle("on",i===cur));
+  const dl=jget(DAYLOG);const[,y,m]=months[cur];
+  const first=new Date(y,m,1),lead=first.getDay(),days=new Date(y,m+1,0).getDate();
+  let h="<table><thead><tr>"+DOW.map(d=>`<th>${d[0]}</th>`).join("")+"</tr></thead><tbody><tr>";let col=0;
+  for(let i=0;i<lead;i++){h+="<td class='out'>.</td>";col++;}
+  for(let dn=1;dn<=days;dn++){if(col===7){h+="</tr><tr>";col=0;}
+    const k=`${y}-${pad(m+1)}-${pad(dn)}`;const e=CAL_EVENTS[k];let dots="";
+    if(e&&e.reta)dots+="<span class='dot r'></span>";if(e&&e.evt)dots+="<span class='dot e'></span>";if(CAL_REMIX.has(k))dots+="<span class='dot m'></span>";
+    const logged=dl[k]&&dl[k].complete?" logged":"";
+    h+=`<td class="${k===TODAY?'today':''}${logged}"><span class="dn">${dn}</span><div class="dots">${dots}</div></td>`;col++;}
+  while(col<7){h+="<td class='out'>.</td>";col++;}h+="</tr></tbody></table>";
+  document.getElementById("calbody").innerHTML=h;
+}
+
+/* ---- Reconstitution calculator ---- */
+function calc(){
+  const mg=parseFloat(document.getElementById("c-mg").value),ml=parseFloat(document.getElementById("c-ml").value),dose=parseFloat(document.getElementById("c-dose").value);
+  const out=document.getElementById("c-out");
+  if(!(mg>0&&ml>0&&dose>0)){out.innerHTML="Enter vial size, water, and dose.";return;}
+  const conc=mg*1000/ml;const perU=conc/100;const units=dose/perU;const total=Math.floor(mg*1000/dose);
+  out.innerHTML=`Draw to <b>${units.toFixed(units<10?1:0)} units</b> on an insulin syringe.<br>Concentration: ${conc.toFixed(0)} mcg/mL · ${perU.toFixed(1)} mcg per unit.<br>~<b>${total}</b> doses per vial.`;
+}
+["c-mg","c-ml","c-dose"].forEach(id=>document.getElementById(id).addEventListener("input",calc));
+calc();
+
+/* ---- setup + tabs ---- */
 function openSetup(){document.getElementById("in-token").value=LS.get("pep_token","");document.getElementById("in-gist").value=LS.get("pep_gist","");document.getElementById("overlay").classList.add("show");}
 document.getElementById("gear").onclick=openSetup;
 document.getElementById("cancel").onclick=()=>document.getElementById("overlay").classList.remove("show");
 document.getElementById("save").onclick=()=>{LS.set("pep_token",document.getElementById("in-token").value.trim());LS.set("pep_gist",document.getElementById("in-gist").value.trim());document.getElementById("overlay").classList.remove("show");sync();};
-
-/* tabs — switch between views */
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
-  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
-  t.classList.add("on");
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));t.classList.add("on");
   document.querySelectorAll(".view").forEach(v=>{v.hidden=(v.id!==t.dataset.v);});
   window.scrollTo({top:0,behavior:"smooth"});
 });
 
-/* boot: accept gist id from link (#g=...), then cached, then refresh */
+/* ---- boot ---- */
 const hash=new URLSearchParams(location.hash.slice(1));
 if(hash.get("g"))LS.set("pep_gist",hash.get("g"));
 const cached=LS.get("pep_data");
 if(cached){try{render(JSON.parse(cached));}catch(e){}}
 sync();
-if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
 </body>
 </html>
