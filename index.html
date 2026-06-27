@@ -57,7 +57,9 @@ body{
 .row.done .chk{background:var(--blue);border-color:var(--blue)}
 .row .chk svg{opacity:0;transition:.15s}.row.done .chk svg{opacity:1}
 .row.done .nm{text-decoration:line-through;color:var(--sec)}
-.ic{width:34px;height:34px;border-radius:11px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12.5px;letter-spacing:-.02em;box-shadow:0 3px 8px rgba(0,0,0,.18)}
+.ic{width:42px;height:42px;border-radius:13px;flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;box-shadow:0 3px 8px rgba(0,0,0,.18);line-height:1}
+.ic .mn{font-weight:800;font-size:12.5px;letter-spacing:-.02em}
+.ic .un{font-weight:600;font-size:9px;opacity:.92;margin-top:2px}
 .row .meta{flex:1;min-width:0}.row .nm{font-size:16px;font-weight:600;line-height:1.2}
 .row .sub{font-size:12.5px;color:var(--sec);margin-top:1px}
 .row .val{font-size:14px;color:var(--ink2);font-weight:600;white-space:nowrap}
@@ -110,10 +112,6 @@ body{
 </head>
 <body>
 <div class="app">
-  <div class="statusbar"><span id="clock">9:41</span><span style="display:inline-flex;gap:6px;align-items:center">
-    <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></svg>
-    <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="1" y="1" width="21" height="10" rx="3" stroke="currentColor" stroke-opacity="0.4"/><rect x="3" y="3" width="15" height="6" rx="1.5" fill="currentColor"/><rect x="23" y="4" width="1.5" height="4" rx="0.75" fill="currentColor" fill-opacity="0.4"/></svg>
-  </span></div>
   <div class="h-top">
     <div><div class="lt">Peptides</div><div class="dt" id="todaydate"></div></div>
     <button class="gear" id="gear" aria-label="Setup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7H1a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 2.6 7a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 9 2.6h.1A1.6 1.6 0 0 0 11 1a2 2 0 1 1 4 0v.1A1.6 1.6 0 0 0 17 2.6a1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7h.2a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.4 1.1z"/></svg></button>
@@ -121,32 +119,37 @@ body{
 
   <div class="banner" id="banner"></div>
 
-  <div class="glass hero" id="herocard">
-    <div class="lead"><div class="ttl">Today</div><div class="ring" id="ring">–</div></div>
-    <div class="site" id="site"></div>
-    <div id="todaylist"></div>
+  <div class="view" id="v-today">
+    <div class="glass hero" id="herocard">
+      <div class="lead"><div class="ttl">Today</div><div class="ring" id="ring">–</div></div>
+      <div class="site" id="site"></div>
+      <div id="todaylist"></div>
+    </div>
+    <div class="sec-h">Daily Protocol</div>
+    <div class="glass list" id="protocol"></div>
   </div>
 
-  <div class="sec-h" id="sec-protocol">Daily Protocol</div>
-  <div class="glass list" id="protocol"></div>
+  <div class="view" id="v-cal" hidden>
+    <div class="sec-h">Calendar</div>
+    <div class="glass cal">
+      <div class="seg" id="seg"></div>
+      <div id="calbody"></div>
+      <div class="legend"><span><i style="background:var(--blue)"></i>Reta</span><span><i style="background:#FF9F0A"></i>Change</span><span><i style="background:#30B0C7"></i>Re-mix</span></div>
+    </div>
+  </div>
 
-  <div class="sec-h" id="sec-vials">Upcoming Vials</div>
-  <div class="glass agenda" id="agenda"></div>
-
-  <div class="sec-h" id="sec-cal">Calendar</div>
-  <div class="glass cal">
-    <div class="seg" id="seg"></div>
-    <div id="calbody"></div>
-    <div class="legend"><span><i style="background:var(--blue)"></i>Reta</span><span><i style="background:#FF9F0A"></i>Change</span><span><i style="background:#30B0C7"></i>Re-mix</span></div>
+  <div class="view" id="v-vials" hidden>
+    <div class="sec-h">Upcoming Vials</div>
+    <div class="glass agenda" id="agenda"></div>
   </div>
 
   <div class="foot" id="foot">Pulls from your private gist · token stays on this device only</div>
 </div>
 
 <nav class="glass tabs">
-  <button class="tab on" data-go="top"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 3 9v12h6v-7h6v7h6V9z"/></svg>Today</button>
-  <button class="tab" data-go="sec-cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Calendar</button>
-  <button class="tab" data-go="sec-vials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6M10 3v5l-4 9a3 3 0 0 0 3 4h6a3 3 0 0 0 3-4l-4-9V3"/></svg>Vials</button>
+  <button class="tab on" data-v="v-today"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 3 9v12h6v-7h6v7h6V9z"/></svg>Today</button>
+  <button class="tab" data-v="v-cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Calendar</button>
+  <button class="tab" data-v="v-vials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6M10 3v5l-4 9a3 3 0 0 0 3 4h6a3 3 0 0 0 3-4l-4-9V3"/></svg>Vials</button>
 </nav>
 
 <div class="overlay" id="overlay">
@@ -167,7 +170,6 @@ const DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const LS={get(k,d){try{return localStorage.getItem(k)??d}catch(e){return d}},
           set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 const _now=new Date();const TODAY=iso(_now);
-document.getElementById("clock").textContent=(_now.getHours()%12||12)+":"+pad(_now.getMinutes());
 document.getElementById("todaydate").textContent=DOW[_now.getDay()]+", "+MON[_now.getMonth()]+" "+_now.getDate();
 
 function banner(msg,cls){const b=document.getElementById("banner");b.textContent=msg;b.className="banner show "+cls;
@@ -193,8 +195,8 @@ async function sync(){
 
 /* ---------- render ---------- */
 const check=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>`;
-const icon=c=>`<div class="ic" style="background:${c.color}">${c.mono}</div>`;
-const val=c=>`${c.units?c.units+"u":""}${c.units&&c.dose?" · ":""}${c.dose||""}`;
+const icon=c=>`<div class="ic" style="background:${c.color}"><span class="mn">${c.mono}</span>${c.units?`<span class="un">${c.units}u</span>`:""}</div>`;
+const val=c=>c.dose||"";
 
 function render(D){
   const COMPOUNDS=D.compounds||[],WEEKLY=D.weekly||{},EVENTS=D.events||{},
@@ -264,9 +266,13 @@ document.getElementById("gear").onclick=openSetup;
 document.getElementById("cancel").onclick=()=>document.getElementById("overlay").classList.remove("show");
 document.getElementById("save").onclick=()=>{LS.set("pep_token",document.getElementById("in-token").value.trim());LS.set("pep_gist",document.getElementById("in-gist").value.trim());document.getElementById("overlay").classList.remove("show");sync();};
 
-/* tabs */
-document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));t.classList.add("on");
-  if(t.dataset.go==="top")window.scrollTo({top:0,behavior:"smooth"});else document.getElementById(t.dataset.go).scrollIntoView({behavior:"smooth",block:"start"});});
+/* tabs — switch between views */
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
+  t.classList.add("on");
+  document.querySelectorAll(".view").forEach(v=>{v.hidden=(v.id!==t.dataset.v);});
+  window.scrollTo({top:0,behavior:"smooth"});
+});
 
 /* boot: accept gist id from link (#g=...), then cached, then refresh */
 const hash=new URLSearchParams(location.hash.slice(1));
