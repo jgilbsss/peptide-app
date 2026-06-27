@@ -234,20 +234,46 @@ const jset=(k,o)=>LS.set(k,JSON.stringify(o));
 const DAYLOG="pep_daylog", SITELOG="pep_sitelog";
 
 /* gist sync (token optional) */
-async function gistPull(){
+async function gistFetch(){
   const token=LS.get("pep_token"),gist=LS.get("pep_gist");
   if(!gist){openSetup();return null;}
   const headers={Accept:"application/vnd.github+json"};
   if(token)headers.Authorization="Bearer "+token;
   const r=await fetch("https://api.github.com/gists/"+gist+"?t="+Date.now(),{headers,cache:"no-store"});
   if(!r.ok)throw new Error("GitHub "+r.status);
-  const g=await r.json();const f=g.files&&g.files["peptidedata.json"];
-  if(!f)throw new Error("peptidedata.json not in gist");
-  return JSON.parse(f.truncated?await(await fetch(f.raw_url)).text():f.content);
+  return await r.json();
+}
+/* merge remote logs into local — union per day so devices never clobber */
+function mergeLogs(remote){
+  const dl=jget(DAYLOG),sl=jget(SITELOG),rdl=(remote&&remote.daylog)||{},rsl=(remote&&remote.sitelog)||{};
+  for(const k in rdl){const a=dl[k],b=rdl[k];
+    if(!a){dl[k]=b;continue;}
+    const done=[...new Set([...(a.done||[]),...(b.done||[])])];
+    const total=Math.max(a.total||0,b.total||0);
+    dl[k]={done,total,complete:total>0&&done.length>=total};}
+  for(const k in rsl){sl[k]=[...new Set([...(sl[k]||[]),...(rsl[k]||[])])];}
+  jset(DAYLOG,dl);jset(SITELOG,sl);
+}
+let _pt=null;
+function pushLogs(){if(!LS.get("pep_token"))return;clearTimeout(_pt);_pt=setTimeout(_doPush,800);}
+async function _doPush(){
+  const token=LS.get("pep_token"),gist=LS.get("pep_gist");if(!token||!gist)return;
+  const body={files:{"petlogs.json":{content:JSON.stringify({daylog:jget(DAYLOG),sitelog:jget(SITELOG),updated:new Date().toISOString()})}}};
+  try{await fetch("https://api.github.com/gists/"+gist,{method:"PATCH",headers:{Authorization:"Bearer "+token,Accept:"application/vnd.github+json"},body:JSON.stringify(body)});}catch(e){}
 }
 async function sync(){
-  try{const d=await gistPull();if(d){LS.set("pep_data",JSON.stringify(d));render(d);banner("Updated "+(d.built||""),"ok");}}
-  catch(e){banner("Sync failed: "+e.message+" — showing last saved","err");}
+  try{
+    const g=await gistFetch();if(!g)return;
+    const f=g.files&&g.files["peptidedata.json"];
+    if(!f)throw new Error("peptidedata.json not in gist");
+    const data=JSON.parse(f.truncated?await(await fetch(f.raw_url)).text():f.content);
+    LS.set("pep_data",JSON.stringify(data));
+    const lf=g.files&&g.files["petlogs.json"];
+    if(lf&&lf.content){try{mergeLogs(JSON.parse(lf.content));}catch(e){}}
+    render(data);
+    if(LS.get("pep_token"))pushLogs();   // propagate merged logs back
+    banner("Updated "+(data.built||""),"ok");
+  }catch(e){banner("Sync failed: "+e.message+" — showing last saved","err");}
 }
 
 const check=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>`;
@@ -312,6 +338,7 @@ function renderToday(prn){
     jset(DAYLOG,dl);
     r.classList.toggle("done");
     updateStats();
+    pushLogs();
   });
   updateStats();
 }
@@ -353,6 +380,7 @@ function renderSites(SITES){
     const i=+z.dataset.z, sl=jget(SITELOG), arr=new Set(sl[TODAY]||[]);
     arr.has(i)?arr.delete(i):arr.add(i);
     sl[TODAY]=[...arr];jset(SITELOG,sl);renderSites(SITES);
+    pushLogs();
   });
   document.getElementById("site-sug").innerHTML=`Suggested next: <b>${SITES[sug]||"—"}</b>`;
   const used=[...todayUsed].map(i=>SITES[i]).join(", ");
