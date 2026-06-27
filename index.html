@@ -152,9 +152,9 @@ body{
 <div class="overlay" id="overlay">
   <div class="glass sheet">
     <h2>Setup</h2>
-    <p>Paste a GitHub token (gist scope) and your gist ID. These stay only on this device and are used to read your private peptide data.</p>
-    <label>GitHub token</label><input id="in-token" type="password" placeholder="github_pat_…" autocomplete="off">
+    <p>Your data loads automatically from your private gist. A token is optional — only add one if you want authenticated requests. Everything stays on this device.</p>
     <label>Gist ID</label><input id="in-gist" type="text" placeholder="e.g. a1b2c3d4…" autocomplete="off">
+    <label>GitHub token (optional)</label><input id="in-token" type="password" placeholder="leave blank if unsure" autocomplete="off">
     <div class="btns"><button class="cancel" id="cancel">Cancel</button><button class="save" id="save">Save &amp; Sync</button></div>
   </div>
 </div>
@@ -176,9 +176,10 @@ function banner(msg,cls){const b=document.getElementById("banner");b.textContent
 /* ---------- gist sync ---------- */
 async function gistPull(){
   const token=LS.get("pep_token"),gist=LS.get("pep_gist");
-  if(!token||!gist){openSetup();return null;}
-  const r=await fetch("https://api.github.com/gists/"+gist,
-    {headers:{Authorization:"Bearer "+token,Accept:"application/vnd.github+json"}});
+  if(!gist){openSetup();return null;}
+  const headers={Accept:"application/vnd.github+json"};
+  if(token)headers.Authorization="Bearer "+token;   // optional; secret gist reads without it
+  const r=await fetch("https://api.github.com/gists/"+gist,{headers});
   if(!r.ok)throw new Error("GitHub "+r.status);
   const g=await r.json();const f=g.files&&g.files["peptidedata.json"];
   if(!f)throw new Error("peptidedata.json not in gist");
@@ -267,7 +268,9 @@ document.getElementById("save").onclick=()=>{LS.set("pep_token",document.getElem
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));t.classList.add("on");
   if(t.dataset.go==="top")window.scrollTo({top:0,behavior:"smooth"});else document.getElementById(t.dataset.go).scrollIntoView({behavior:"smooth",block:"start"});});
 
-/* boot: cached first, then refresh */
+/* boot: accept gist id from link (#g=...), then cached, then refresh */
+const hash=new URLSearchParams(location.hash.slice(1));
+if(hash.get("g"))LS.set("pep_gist",hash.get("g"));
 const cached=LS.get("pep_data");
 if(cached){try{render(JSON.parse(cached));}catch(e){}}
 sync();
