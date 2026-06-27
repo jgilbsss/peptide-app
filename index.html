@@ -181,7 +181,7 @@ async function gistPull(){
   if(!gist){openSetup();return null;}
   const headers={Accept:"application/vnd.github+json"};
   if(token)headers.Authorization="Bearer "+token;   // optional; secret gist reads without it
-  const r=await fetch("https://api.github.com/gists/"+gist,{headers});
+  const r=await fetch("https://api.github.com/gists/"+gist+"?t="+Date.now(),{headers,cache:"no-store"});
   if(!r.ok)throw new Error("GitHub "+r.status);
   const g=await r.json();const f=g.files&&g.files["peptidedata.json"];
   if(!f)throw new Error("peptidedata.json not in gist");
