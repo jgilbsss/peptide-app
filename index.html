@@ -98,6 +98,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display"
 .chip2.r{background:rgba(255,69,58,.18);color:#FF453A}
 .chip2.n{background:var(--pill);color:var(--sec)}
 .row.arch{opacity:.5}
+/* research expandable rows */
+.rx{border-top:1px solid var(--hair)}
+.rx:first-child{border-top:0}
+.rx .row{border-top:0}
+.rxh{cursor:pointer}
+.chev{width:16px;height:16px;color:var(--sec);flex:0 0 auto;transition:transform .2s}
+.rx.open .chev{transform:rotate(90deg)}
+.rxd{display:none;padding:2px 4px 12px 55px}
+.rx.open .rxd{display:block}
+.rxd .rd{font-size:12.5px;color:var(--ink2);line-height:1.5;margin-top:7px}
+.rxd .rdl{font-weight:700;color:var(--sec);text-transform:uppercase;font-size:10.5px;letter-spacing:.03em;display:block;margin-bottom:1px}
+.rxd .rdsum{font-style:italic;color:var(--sec)}
 /* calculator */
 .calc{padding:14px 16px}
 .calc-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--hair)}
@@ -330,16 +342,21 @@ function render(D){
 
   /* research library (view-only) */
   const RESEARCH=D.research||[];
-  const rmeta={active:["Active","g"],backup:["Backup","n"],retired:["Retired","r"]};
+  const rmeta={active:["Active","g"],backup:["Backup","n"],retired:["Retired","r"],reference:["Reference","n"]};
   const rc=document.getElementById("research");
   if(rc){
+    const chev=`<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>`;
+    const rd=(lbl,v)=>v?`<div class="rd"><span class="rdl">${lbl}</span>${v}</div>`:"";
     const grp=(lbl,arr)=>arr.length?`<div class="grp">${lbl}</div>`+arr.map(x=>{
-      const sm=rmeta[x.status]||["",""];
+      const sm=rmeta[x.status]||["Reference","n"];
       const meta=(x.date?("Researched "+x.date):"Not yet researched")+(x.evidence?" · "+x.evidence:"");
-      return `<div class="row"><div class="ic" style="background:${x.color||'#8a8a8e'}"><span class="mn">${x.mono||"·"}</span></div><div class="meta"><div class="nm">${x.name}</div><div class="sub">${meta}</div>${x.summary?`<div class="sub">${x.summary}</div>`:""}</div><div class="chip2 ${sm[1]}">${sm[0]}</div></div>`;
+      const d=x.detail||{};
+      const body=(x.summary?`<div class="rd rdsum">${x.summary}</div>`:"")+rd("What it is",d.uses)+rd("Timing",d.timing)+rd("Dosing",d.dosing)+rd("Safety",d.safety);
+      return `<div class="rx"><div class="row rxh"><div class="ic" style="background:${x.color||'#8a8a8e'}"><span class="mn">${x.mono||"·"}</span></div><div class="meta"><div class="nm">${x.name}</div><div class="sub">${meta}</div></div><div class="chip2 ${sm[1]}">${sm[0]}</div>${chev}</div><div class="rxd">${body||'<div class="rd">No extra detail yet.</div>'}</div></div>`;
     }).join(""):"";
     const researched=RESEARCH.filter(x=>x.date), pending=RESEARCH.filter(x=>!x.date);
     rc.innerHTML=(grp("Researched",researched)+grp("Not yet researched",pending))||'<div class="row"><div class="meta"><div class="sub">No research yet</div></div></div>';
+    rc.querySelectorAll(".rxh").forEach(h=>h.onclick=()=>h.parentElement.classList.toggle("open"));
   }
 
   buildCalendar(EVENTS,TIMELINE);
