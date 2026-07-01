@@ -201,6 +201,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display"
     </div>
   </div>
 
+  <div class="view" id="v-research" hidden>
+    <div class="sec-h">Research Library</div>
+    <div class="glass list" id="research"></div>
+    <div class="foot" style="margin-top:14px">View-only · full reports live in your Peptides folder on your Mac</div>
+  </div>
+
   <div class="foot" id="foot"></div>
 </div>
 
@@ -208,6 +214,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display"
   <button class="tab on" data-v="v-today"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 3 9v12h6v-7h6v7h6V9z"/></svg>Today</button>
   <button class="tab" data-v="v-cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Calendar</button>
   <button class="tab" data-v="v-vials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6M10 3v5l-4 9a3 3 0 0 0 3 4h6a3 3 0 0 0 3-4l-4-9V3"/></svg>Vials</button>
+  <button class="tab" data-v="v-research"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2z"/><path d="M8 3v18"/></svg>Research</button>
 </nav>
 
 <div class="overlay" id="overlay"><div class="glass sheet">
@@ -320,6 +327,20 @@ function render(D){
   if(INV.powder.length)ih+=`<div class="grp">Backup stock</div>`+INV.powder.map(c=>invRow(c,`<div class="chip2 n">${c.chip}</div>`)).join("");
   if(INV.discarded.length)ih+=`<div class="grp">Archive</div>`+INV.discarded.map(c=>`<div class="row arch">${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">Discarded</div></div></div>`).join("");
   document.getElementById("inventory").innerHTML=ih||'<div class="row"><div class="meta"><div class="sub">No inventory</div></div></div>';
+
+  /* research library (view-only) */
+  const RESEARCH=D.research||[];
+  const rmeta={active:["Active","g"],backup:["Backup","n"],retired:["Retired","r"]};
+  const rc=document.getElementById("research");
+  if(rc){
+    const grp=(lbl,arr)=>arr.length?`<div class="grp">${lbl}</div>`+arr.map(x=>{
+      const sm=rmeta[x.status]||["",""];
+      const meta=(x.date?("Researched "+x.date):"Not yet researched")+(x.evidence?" · "+x.evidence:"");
+      return `<div class="row"><div class="ic" style="background:${x.color||'#8a8a8e'}"><span class="mn">${x.mono||"·"}</span></div><div class="meta"><div class="nm">${x.name}</div><div class="sub">${meta}</div>${x.summary?`<div class="sub">${x.summary}</div>`:""}</div><div class="chip2 ${sm[1]}">${sm[0]}</div></div>`;
+    }).join(""):"";
+    const researched=RESEARCH.filter(x=>x.date), pending=RESEARCH.filter(x=>!x.date);
+    rc.innerHTML=(grp("Researched",researched)+grp("Not yet researched",pending))||'<div class="row"><div class="meta"><div class="sub">No research yet</div></div></div>';
+  }
 
   buildCalendar(EVENTS,TIMELINE);
 }
