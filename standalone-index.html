@@ -132,6 +132,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display"
 .dots{display:flex;gap:3px;justify-content:center;margin-top:3px;height:5px}
 .dot{width:5px;height:5px;border-radius:50%}
 .dot.r{background:var(--blue)}.dot.e{background:#FF9F0A}.dot.m{background:#30B0C7}.dot.tw{background:#5E5CE6}
+.calday{margin-top:11px;font-size:12.5px;line-height:1.4;color:var(--txt);text-align:center;min-height:18px}
 .legend{display:flex;gap:13px;justify-content:center;flex-wrap:wrap;margin-top:14px;font-size:11px;color:var(--sec)}
 .legend span{display:inline-flex;align-items:center;gap:5px}.legend i{width:7px;height:7px;border-radius:50%;display:inline-block}
 .legend i.ring{background:transparent;box-shadow:0 0 0 2px var(--green)}
@@ -195,6 +196,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display"
       <div class="seg" id="seg"></div>
       <div id="calbody"></div>
       <div class="legend"><span><i style="background:var(--blue)"></i>Reta</span><span><i style="background:#5E5CE6"></i>TB-500</span><span><i style="background:#FF9F0A"></i>Change</span><span><i style="background:#30B0C7"></i>Re-mix</span><span><i class="ring"></i>Logged</span></div>
+      <div id="calday" class="calday">Tap a day to see what's on it.</div>
     </div>
   </div>
 
@@ -446,9 +448,22 @@ function drawCal(){
     const k=`${y}-${pad(m+1)}-${pad(dn)}`;const e=CAL_EVENTS[k];let dots="";
     if(e&&e.reta)dots+="<span class='dot r'></span>";if(e&&e.tw)dots+="<span class='dot tw'></span>";if(e&&e.evt)dots+="<span class='dot e'></span>";if(CAL_REMIX.has(k))dots+="<span class='dot m'></span>";
     const logged=dl[k]&&dl[k].complete?" logged":"";
-    h+=`<td class="${k===TODAY?'today':''}${logged}"><span class="dn">${dn}</span><div class="dots">${dots}</div></td>`;col++;}
+    h+=`<td data-k="${k}" class="${k===TODAY?'today':''}${logged}"><span class="dn">${dn}</span><div class="dots">${dots}</div></td>`;col++;}
   while(col<7){h+="<td class='out'>.</td>";col++;}h+="</tr></tbody></table>";
   document.getElementById("calbody").innerHTML=h;
+  document.getElementById("calbody").querySelectorAll("td[data-k]").forEach(td=>td.onclick=()=>showCalDay(td.dataset.k));
+  if(months[cur][1]===_now.getFullYear()&&months[cur][2]===_now.getMonth())showCalDay(TODAY);
+  else document.getElementById("calday").textContent="Tap a day to see what's on it.";
+}
+function showCalDay(k){
+  const e=CAL_EVENTS[k]||{},parts=[];
+  if(e.reta)parts.push("Retatrutide "+e.reta);
+  if(e.tw)parts.push("TB-500 dose");
+  if(e.evt)e.evt.forEach(x=>parts.push(x));
+  if(CAL_REMIX.has(k))parts.push("Re-mix a fresh vial");
+  const dl=jget(DAYLOG);if(dl[k]&&dl[k].complete)parts.push("✓ Logged");
+  const d=new Date(k+"T00:00"),lbl=DOW[d.getDay()]+", "+MON[d.getMonth()]+" "+d.getDate();
+  document.getElementById("calday").innerHTML=parts.length?`<b>${lbl}</b> — ${parts.join(" · ")}`:`<b>${lbl}</b> — nothing scheduled`;
 }
 
 /* ---- Reconstitution calculator ---- */
