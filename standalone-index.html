@@ -358,7 +358,8 @@ function render(D){
       const body=(x.summary?`<div class="rd rdsum">${x.summary}</div>`:"")+rd("What it is",d.uses)+rd("Timing",d.timing)+rd("Dosing",d.dosing)+rd("Safety",d.safety);
       return `<div class="rx"><div class="row rxh"><div class="ic" style="background:${x.color||'#8a8a8e'}"><span class="mn">${x.mono||"·"}</span></div><div class="meta"><div class="nm">${x.name}</div><div class="sub">${meta}</div></div><div class="chip2 ${sm[1]}">${sm[0]}</div>${chev}</div><div class="rxd">${body||'<div class="rd">No extra detail yet.</div>'}</div></div>`;
     }).join(""):"";
-    const researched=RESEARCH.filter(x=>x.date), pending=RESEARCH.filter(x=>!x.date);
+    const rrank={active:0,backup:1,reference:2,retired:3};
+    const researched=RESEARCH.filter(x=>x.date).slice().sort((a,b)=>(rrank[a.status]??9)-(rrank[b.status]??9)), pending=RESEARCH.filter(x=>!x.date);
     rc.innerHTML=(grp("Researched",researched)+grp("Not yet researched",pending))||'<div class="row"><div class="meta"><div class="sub">No research yet</div></div></div>';
     rc.querySelectorAll(".rxh").forEach(h=>h.onclick=()=>h.parentElement.classList.toggle("open"));
   }
