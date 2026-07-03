@@ -310,8 +310,8 @@ function render(D){
   todays=[];
   if(WED.includes(TODAY)&&WEEKLY.name)todays.push({...WEEKLY,when:"Morning"});
   COMPOUNDS.filter(c=>c.group==="midday").forEach(c=>todays.push({...c,when:"Midday · 12:00"}));
-  COMPOUNDS.filter(c=>c.group==="prebed").forEach(c=>todays.push({...c,when:"Pre-bed · 9:30 PM"}));
   {const _dow=new Date().getDay();COMPOUNDS.filter(c=>c.group==="twice").forEach(c=>{if(_dow===1||_dow===4||c.first===TODAY)todays.push({...c,when:"Midday · 12:00"});});}
+  COMPOUNDS.filter(c=>c.group==="prebed").forEach(c=>todays.push({...c,when:"Pre-bed · 9:30 PM"}));
   const prn=COMPOUNDS.filter(c=>c.group==="prn");
   renderToday(prn);
 
