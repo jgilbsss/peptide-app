@@ -311,11 +311,12 @@ function render(D){
   if(WED.includes(TODAY)&&WEEKLY.name)todays.push({...WEEKLY,when:"Morning"});
   COMPOUNDS.filter(c=>c.group==="midday").forEach(c=>todays.push({...c,when:"Midday · 12:00"}));
   COMPOUNDS.filter(c=>c.group==="prebed").forEach(c=>todays.push({...c,when:"Pre-bed · 9:30 PM"}));
+  {const _dow=new Date().getDay();if(_dow===1||_dow===4)COMPOUNDS.filter(c=>c.group==="twice").forEach(c=>todays.push({...c,when:"Midday · 12:00"}));}
   const prn=COMPOUNDS.filter(c=>c.group==="prn");
   renderToday(prn);
 
   /* protocol */
-  const groups=[["Midday","midday"],["Pre-bed","prebed"],["As needed","prn"],["Weekly","weekly"]];
+  const groups=[["Midday","midday"],["Pre-bed","prebed"],["Twice weekly","twice"],["As needed","prn"],["Weekly","weekly"]];
   const allc=[...COMPOUNDS,WEEKLY];
   document.getElementById("protocol").innerHTML=groups.map(([lbl,g])=>{
     const items=allc.filter(c=>c.group===g);if(!items.length)return"";
