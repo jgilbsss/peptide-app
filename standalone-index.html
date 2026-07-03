@@ -128,7 +128,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display"
 .cal td .dn{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%}
 .cal td.today .dn{background:var(--blue);color:#fff}
 .cal td.logged .dn{box-shadow:0 0 0 2px var(--green)}
-.cal td.today.logged .dn{box-shadow:none}
+.cal td.partial .dn{box-shadow:0 0 0 2px var(--sec)}
+.cal td.today.logged .dn,.cal td.today.partial .dn{box-shadow:none}
+.caltog{color:var(--blue);font-weight:600;cursor:pointer;white-space:nowrap}
 .dots{display:flex;gap:3px;justify-content:center;margin-top:3px;height:5px}
 .dot{width:5px;height:5px;border-radius:50%}
 .dot.r{background:var(--blue)}.dot.e{background:#FF9F0A}.dot.m{background:#30B0C7}.dot.tw{background:#5E5CE6}
@@ -195,7 +197,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display"
     <div class="glass cal">
       <div class="seg" id="seg"></div>
       <div id="calbody"></div>
-      <div class="legend"><span><i style="background:var(--blue)"></i>Reta</span><span><i style="background:#5E5CE6"></i>TB-500</span><span><i style="background:#FF9F0A"></i>Change</span><span><i style="background:#30B0C7"></i>Re-mix</span><span><i class="ring"></i>Logged</span></div>
+      <div class="legend"><span><i style="background:var(--blue)"></i>Reta</span><span><i style="background:#5E5CE6"></i>TB-500</span><span><i style="background:#FF9F0A"></i>Change</span><span><i style="background:#30B0C7"></i>Re-mix</span><span><i class="ring"></i>Logged</span><span><i style="background:transparent;box-shadow:0 0 0 2px var(--sec)"></i>Partial</span></div>
       <div id="calday" class="calday">Tap a day to see what's on it.</div>
     </div>
   </div>
@@ -447,8 +449,8 @@ function drawCal(){
   for(let dn=1;dn<=days;dn++){if(col===7){h+="</tr><tr>";col=0;}
     const k=`${y}-${pad(m+1)}-${pad(dn)}`;const e=CAL_EVENTS[k];let dots="";
     if(e&&e.reta)dots+="<span class='dot r'></span>";if(e&&e.tw)dots+="<span class='dot tw'></span>";if(e&&e.evt)dots+="<span class='dot e'></span>";if(CAL_REMIX.has(k))dots+="<span class='dot m'></span>";
-    const logged=dl[k]&&dl[k].complete?" logged":"";
-    h+=`<td data-k="${k}" class="${k===TODAY?'today':''}${logged}"><span class="dn">${dn}</span><div class="dots">${dots}</div></td>`;col++;}
+    const en=dl[k];let lc="";if(en&&en.complete)lc=" logged";else if(en&&(en.done||[]).length)lc=" partial";
+    h+=`<td data-k="${k}" class="${k===TODAY?'today':''}${lc}"><span class="dn">${dn}</span><div class="dots">${dots}</div></td>`;col++;}
   while(col<7){h+="<td class='out'>.</td>";col++;}h+="</tr></tbody></table>";
   document.getElementById("calbody").innerHTML=h;
   document.getElementById("calbody").querySelectorAll("td[data-k]").forEach(td=>td.onclick=()=>showCalDay(td.dataset.k));
@@ -461,9 +463,20 @@ function showCalDay(k){
   if(e.tw)parts.push("TB-500 dose");
   if(e.evt)e.evt.forEach(x=>parts.push(x));
   if(CAL_REMIX.has(k))parts.push("Re-mix a fresh vial");
-  const dl=jget(DAYLOG);if(dl[k]&&dl[k].complete)parts.push("✓ Logged");
+  const dl=jget(DAYLOG),en=dl[k];let status="";
+  if(en&&en.complete)status=" · ✓ Logged";
+  else if(en&&(en.done||[]).length)status=` · ${(en.done||[]).length}/${en.total||"?"} logged`;
   const d=new Date(k+"T00:00"),lbl=DOW[d.getDay()]+", "+MON[d.getMonth()]+" "+d.getDate();
-  document.getElementById("calday").innerHTML=parts.length?`<b>${lbl}</b> — ${parts.join(" · ")}`:`<b>${lbl}</b> — nothing scheduled`;
+  const head=parts.length?`<b>${lbl}</b> — ${parts.join(" · ")}${status}`:`<b>${lbl}</b> — nothing scheduled${status}`;
+  let action="";
+  if(k<=TODAY)action=(en&&en.complete)?` · <a class="caltog" onclick="toggleDayLog('${k}')">clear log</a>`:` · <a class="caltog" onclick="toggleDayLog('${k}')">mark logged</a>`;
+  document.getElementById("calday").innerHTML=head+action;
+}
+function toggleDayLog(k){
+  const dl=jget(DAYLOG),en=dl[k];
+  if(en&&en.complete)delete dl[k];else dl[k]={done:[0],total:1,complete:true};
+  jset(DAYLOG,dl);if(LS.get("pep_token"))pushLogs();
+  drawCal();showCalDay(k);
 }
 
 /* ---- Reconstitution calculator ---- */
