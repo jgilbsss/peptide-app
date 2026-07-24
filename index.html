@@ -97,6 +97,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display"
 .chip2.a{background:rgba(255,159,10,.18);color:var(--amber)}
 .chip2.r{background:rgba(255,69,58,.18);color:#FF453A}
 .chip2.n{background:var(--pill);color:var(--sec)}
+.vw{font-size:11.5px;font-weight:600;line-height:1.35;margin-top:4px;padding:5px 8px;border-radius:8px}
+.vw.a{background:rgba(255,159,10,.14);color:var(--amber)}
+.vw.r{background:rgba(255,69,58,.14);color:#FF453A}
+.row.done .vw{opacity:.45}
 .row.arch{opacity:.5}
 /* research expandable rows */
 .rx{border-top:1px solid var(--hair)}
@@ -368,12 +372,23 @@ function render(D){
   buildCalendar(EVENTS,TIMELINE);
 }
 
+/* ---- vial-state warning shown under a dose on the Today card ---- */
+function vialWarn(c){
+  if(c.state==="CHECK")
+    return `<div class="vw a">⚠ CHECK — day ${c.day_n} of a ${c.stab_n}-day vial. Compare to mix day: cloudy, particles, colour change or film → discard. Clear ≠ sterile. Hard discard ${c.check_thru}.</div>`;
+  if(c.state==="EMPTY")
+    return `<div class="vw r">⛔ Vial projected empty — reconstitute before dosing.</div>`;
+  if(c.state==="DISCARD")
+    return `<div class="vw r">⛔ Past the grace window — discard and reconstitute before dosing.</div>`;
+  return "";
+}
+
 /* ---- Today: doses + ring + streak + week ---- */
 function renderToday(prn){
   const dl=jget(DAYLOG);const e=dl[TODAY]||{done:[]};
   const done=new Set(e.done||[]);
   const tl=document.getElementById("todaylist");
-  tl.innerHTML=todays.map((c,i)=>`<div class="row${done.has(i)?' done':''}" data-i="${i}"><div class="chk">${check}</div>${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">${c.when}${c.note?" · "+c.note:""}</div></div><div class="val">${val(c)}</div></div>`).join("")
+  tl.innerHTML=todays.map((c,i)=>`<div class="row${done.has(i)?' done':''}" data-i="${i}"><div class="chk">${check}</div>${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">${c.when}${c.note?" · "+c.note:""}</div>${vialWarn(c)}</div><div class="val">${val(c)}</div></div>`).join("")
     +(prn||[]).map(c=>`<div class="row opt">${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">As needed · ${c.dose}</div></div><div class="val">PRN</div></div>`).join("");
   tl.querySelectorAll(".row[data-i]").forEach(r=>r.onclick=()=>{
     const i=+r.dataset.i, dl=jget(DAYLOG), s=new Set((dl[TODAY]||{}).done||[]);
