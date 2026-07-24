@@ -369,7 +369,7 @@ function render(D){
     rc.querySelectorAll(".rxh").forEach(h=>h.onclick=()=>h.parentElement.classList.toggle("open"));
   }
 
-  buildCalendar(EVENTS,TIMELINE);
+  buildCalendar(EVENTS,TIMELINE,D.months);
 }
 
 /* ---- vial-state warning shown under a dose on the Today card ---- */
@@ -448,10 +448,13 @@ function renderSites(SITES){
 
 /* ---- Calendar with logged-day history ---- */
 let CAL_EVENTS={},CAL_REMIX=new Set(),cur=0;
-const months=[["June",2026,5],["July",2026,6],["August",2026,7]];
-function buildCalendar(EVENTS,TIMELINE){
+/* Month tabs come from the build (D.months) so the calendar rolls forward.
+   The literal below is only a fallback if an old peptidedata.json is cached. */
+let months=[["June",2026,5],["July",2026,6],["August",2026,7]];
+function buildCalendar(EVENTS,TIMELINE,MONTHS_IN){
+  if(MONTHS_IN&&MONTHS_IN.length)months=MONTHS_IN;
   CAL_EVENTS=EVENTS;CAL_REMIX=new Set(TIMELINE.map(t=>t.d));
-  cur=(_now.getMonth()>=5&&_now.getMonth()<=7)?_now.getMonth()-5:0;
+  cur=Math.max(0,months.findIndex(m=>m[1]===_now.getFullYear()&&m[2]===_now.getMonth()));
   const seg=document.getElementById("seg");
   seg.innerHTML=months.map((m,i)=>`<button class="${i===cur?'on':''}" data-m="${i}">${m[0].slice(0,3)}</button>`).join("");
   seg.querySelectorAll("button").forEach(b=>b.onclick=()=>{cur=+b.dataset.m;drawCal();});
