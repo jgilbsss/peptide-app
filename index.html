@@ -97,6 +97,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display"
 .chip2.a{background:rgba(255,159,10,.18);color:var(--amber)}
 .chip2.r{background:rgba(255,69,58,.18);color:#FF453A}
 .chip2.n{background:var(--pill);color:var(--sec)}
+.nextup{margin-top:2px;padding:11px 14px;border-top:1px solid rgba(120,120,128,.16);font-size:13px;color:var(--ink2);display:flex;gap:8px;align-items:center}
+.nextup b{color:var(--ink)}
+.nextup .soon{color:#FF9F0A;font-weight:700}
+details.proto{margin-top:18px}
+details.proto>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px}
+details.proto>summary::-webkit-details-marker{display:none}
+details.proto>summary::after{content:"▸";font-size:12px;color:var(--sec);transition:transform .15s}
+details.proto[open]>summary::after{transform:rotate(90deg)}
+.skipbtn{flex:0 0 auto;font-size:11px;font-weight:700;color:var(--sec);background:var(--pill);border:0;border-radius:14px;padding:5px 10px;margin-left:8px;cursor:pointer}
+.skipbtn:active{opacity:.6}
+.row.skipped{opacity:.62}
+.row.skipped .nm{text-decoration:line-through;text-decoration-color:rgba(120,120,128,.6)}
+.skiptag{display:inline-block;font-size:10.5px;font-weight:700;color:var(--amber);background:rgba(255,159,10,.16);border-radius:10px;padding:2px 7px;margin-top:3px}
+.subrow{display:flex;gap:6px;align-items:center;margin-top:3px;flex-wrap:wrap}
+.subpill{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:9px;background:var(--pill);color:var(--ink2)}
+.tapvial{cursor:pointer}
+.tapvial:active{opacity:.6}
+.tapvial .nm::after{content:"›";color:var(--sec);font-weight:700;margin-left:6px}
+.asksheet{position:fixed;inset:0;background:rgba(0,0,0,.34);display:none;align-items:flex-end;z-index:60}
+.asksheet.show{display:flex}
+.asksheet-in{background:var(--card);width:100%;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -8px 40px rgba(0,0,0,.2)}
+.asksheet-in h3{margin:0 0 4px;font-size:17px}
+.asksheet-in p{margin:0 0 14px;font-size:13px;color:var(--sec)}
+.asksheet-opt{width:100%;text-align:left;font-size:15px;font-weight:600;padding:13px 14px;margin-bottom:8px;border:0;border-radius:12px;background:var(--pill);color:var(--ink);cursor:pointer}
+.asksheet-opt:active{opacity:.65}
+.asksheet-cancel{width:100%;font-size:15px;font-weight:700;padding:13px;border:0;border-radius:12px;background:transparent;color:var(--sec);cursor:pointer}
 .vw{font-size:11.5px;font-weight:600;line-height:1.35;margin-top:4px;padding:5px 8px;border-radius:8px}
 .vw.a{background:rgba(255,159,10,.14);color:var(--amber)}
 .vw.r{background:rgba(255,69,58,.14);color:#FF453A}
@@ -177,6 +203,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display"
         <div class="herometa"><div class="ttl">Today</div><div class="streak" id="streak"></div><div class="week" id="week"></div></div>
       </div>
       <div id="todaylist"></div>
+      <div id="nextup" class="nextup"></div>
     </div>
 
     <div class="sec-h">Injection Site</div>
@@ -193,8 +220,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display"
       <div class="site-info"><div id="site-sug"></div><div class="site-sub" id="site-today"></div></div>
     </div>
 
-    <div class="sec-h">Daily Protocol</div>
-    <div class="glass list" id="protocol"></div>
+    <details class="proto"><summary class="sec-h">Full protocol</summary>
+      <div class="glass list" id="protocol"></div>
+    </details>
   </div>
 
   <div class="view" id="v-cal" hidden>
@@ -237,6 +265,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display"
   <button class="tab" data-v="v-research"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2z"/><path d="M8 3v18"/></svg>Research</button>
 </nav>
 
+<div class="asksheet" id="asksheet"><div class="asksheet-in">
+  <h3 id="ask-ttl">Skip this dose?</h3>
+  <p id="ask-sub">Logged as a planned skip — your streak survives.</p>
+  <div id="ask-opts"></div>
+  <button class="asksheet-cancel" id="ask-cancel">Cancel</button>
+</div></div>
 <div class="overlay" id="overlay"><div class="glass sheet">
   <h2>Setup</h2>
   <p>Your data loads automatically from your private gist. A token is optional. Everything stays on this device.</p>
@@ -263,7 +297,12 @@ const DAYLOG="pep_daylog", SITELOG="pep_sitelog";
 /* gist sync (token optional) */
 async function gistFetch(){
   const token=LS.get("pep_token"),gist=LS.get("pep_gist");
-  if(!gist){openSetup();return null;}
+  if(!gist){
+    /* Only demand setup on a genuine first run. If there is cached data, show it
+       and say so quietly instead of blocking the whole app behind a modal. */
+    if(LS.get("pep_data"))banner("Offline — showing last saved data","err");
+    else openSetup();
+    return null;}
   const headers={Accept:"application/vnd.github+json"};
   if(token)headers.Authorization="Bearer "+token;
   const r=await fetch("https://api.github.com/gists/"+gist+"?t="+Date.now(),{headers,cache:"no-store"});
@@ -276,8 +315,11 @@ function mergeLogs(remote){
   for(const k in rdl){const a=dl[k],b=rdl[k];
     if(!a){dl[k]=b;continue;}
     const done=[...new Set([...(a.done||[]),...(b.done||[])])];
+    const skip=Object.assign({},b.skip||{},a.skip||{});   // local wins on conflict
     const total=Math.max(a.total||0,b.total||0);
-    dl[k]={done,total,complete:total>0&&done.length>=total};}
+    const psize=Math.max(a.psize||0,b.psize||0);
+    dl[k]={done,skip,total,psize,
+           complete:total>0&&(done.length+Object.keys(skip).length)>=total};}
   for(const k in rsl){sl[k]=[...new Set([...(sl[k]||[]),...(rsl[k]||[])])];}
   jset(DAYLOG,dl);jset(SITELOG,sl);
 }
@@ -297,6 +339,10 @@ async function sync(){
     LS.set("pep_data",JSON.stringify(data));
     const lf=g.files&&g.files["petlogs.json"];
     if(lf&&lf.content){try{mergeLogs(JSON.parse(lf.content));}catch(e){}}
+    /* The Mac empties pending.json once it has written the change into inventory.xlsx. */
+    const pf=g.files&&g.files["pending.json"];
+    if(pf&&pf.content){try{const rp=JSON.parse(pf.content);
+      if(!rp.remix||!rp.remix.length)jset("pep_pending",{remix:[]});}catch(e){}}
     render(data);
     if(LS.get("pep_token"))pushLogs();   // propagate merged logs back
     banner("Updated "+(data.built||""),"ok");
@@ -320,6 +366,7 @@ function render(D){
   COMPOUNDS.filter(c=>c.group==="midday").forEach(c=>todays.push({...c,when:"Midday · 12:00"}));
   {const _dow=new Date().getDay();COMPOUNDS.filter(c=>c.group==="twice").forEach(c=>{if(_dow===1||_dow===4||c.first===TODAY)todays.push({...c,when:"Midday · 12:00"});});}
   COMPOUNDS.filter(c=>c.group==="prebed").forEach(c=>todays.push({...c,when:"Pre-bed · 9:30 PM"}));
+  todays=mergeCodraw(todays);
   const prn=COMPOUNDS.filter(c=>c.group==="prn");
   renderToday(prn);
 
@@ -342,12 +389,17 @@ function render(D){
   }).join("")||'<div class="ag"><div class="meta"><div class="sub">No upcoming items</div></div></div>';
 
   /* inventory */
-  const invRow=(c,tr)=>`<div class="row">${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">${c.line2||""}</div></div>${tr}</div>`;
+  /* Vial rows are tappable: they load the calculator with that vial's own recipe and
+     offer "I re-mixed this today", which writes back to inventory.xlsx via the gist. */
+  const invRow=(c,tr,tap)=>`<div class="row${tap?" tapvial":""}"${tap?` data-vial="${c.key}"`:""}>${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">${c.line2||""}</div></div>${tr}</div>`;
   let ih="";
-  if(INV.active.length)ih+=`<div class="grp">Active</div>`+INV.active.map(c=>invRow(c,`<div class="chip2 ${c.tone}">${c.chip}</div>`)).join("");
-  if(INV.powder.length)ih+=`<div class="grp">Backup stock</div>`+INV.powder.map(c=>invRow(c,`<div class="chip2 n">${c.chip}</div>`)).join("");
+  if(INV.active.length)ih+=`<div class="grp">Active</div>`+INV.active.map(c=>invRow(c,`<div class="chip2 ${c.tone}">${c.chip}</div>`,true)).join("");
+  if(INV.powder.length)ih+=`<div class="grp">Backup stock</div>`+INV.powder.map(c=>invRow(c,`<div class="chip2 n">${c.chip}</div>`,!c.supply)).join("");
   if(INV.discarded.length)ih+=`<div class="grp">Archive</div>`+INV.discarded.map(c=>`<div class="row arch">${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">Discarded</div></div></div>`).join("");
   document.getElementById("inventory").innerHTML=ih||'<div class="row"><div class="meta"><div class="sub">No inventory</div></div></div>';
+  VIALS={};[...INV.active,...INV.powder].forEach(c=>{if(c.key&&!VIALS[c.key])VIALS[c.key]=c;});
+  document.getElementById("inventory").querySelectorAll(".tapvial").forEach(r=>
+    r.onclick=()=>vialSheet(r.dataset.vial));
 
   /* research library (view-only) */
   const RESEARCH=D.research||[];
@@ -375,7 +427,7 @@ function render(D){
 /* ---- vial-state warning shown under a dose on the Today card ---- */
 function vialWarn(c){
   if(c.state==="CHECK")
-    return `<div class="vw a">⚠ CHECK — day ${c.day_n} of a ${c.stab_n}-day vial. Compare to mix day: cloudy, particles, colour change or film → discard. Clear ≠ sterile. Hard discard ${c.check_thru}.</div>`;
+    return `<div class="vw a">⚠ CHECK · day ${c.day_n} of ${c.stab_n} — compare to mix day; cloudy, bits or colour change → discard. Clear ≠ sterile. Hard stop ${(c.check_thru||"").slice(5)}.</div>`;
   if(c.state==="EMPTY")
     return `<div class="vw r">⛔ Vial projected empty — reconstitute before dosing.</div>`;
   if(c.state==="DISCARD")
@@ -383,43 +435,192 @@ function vialWarn(c){
   return "";
 }
 
+/* ---- vial actions: prefill the calculator, or record a re-mix ------------------
+   Re-mixing used to require opening Excel on the Mac, which is why a KPV re-mix went
+   nine days unrecorded. The phone now queues the change into the gist and the daily
+   Mac job applies it to inventory.xlsx. */
+let VIALS={};
+function vialSheet(key){
+  const v=VIALS[key];if(!v)return;
+  document.getElementById("ask-ttl").textContent=v.name;
+  document.getElementById("ask-sub").textContent=v.line2||"";
+  const opts=[];
+  if(v.calc&&v.calc.mg)opts.push(["Open calculator for this vial",()=>{
+    document.getElementById("c-mg").value=v.calc.mg;
+    if(v.calc.ml)document.getElementById("c-ml").value=v.calc.ml;
+    if(v.calc.dose)document.getElementById("c-dose").value=v.calc.dose;
+    calc();document.getElementById("c-mg").scrollIntoView({behavior:"smooth",block:"center"});}]);
+  opts.push(["I re-mixed this today",()=>queueRemix(v)]);
+  const box=document.getElementById("ask-opts");
+  box.innerHTML=opts.map(o=>`<button class="asksheet-opt">${o[0]}</button>`).join("");
+  const sheet=document.getElementById("asksheet"),close=()=>sheet.classList.remove("show");
+  box.querySelectorAll("button").forEach((b,i)=>b.onclick=()=>{opts[i][1]();close();});
+  document.getElementById("ask-cancel").onclick=close;
+  sheet.onclick=(ev)=>{if(ev.target===sheet)close();};
+  sheet.classList.add("show");
+}
+function queueRemix(v){
+  if(!LS.get("pep_token")){banner("Needs a GitHub token in Setup to write back","err");return;}
+  const q=jget("pep_pending");const list=Array.isArray(q.remix)?q.remix:[];
+  list.push({compound:v.name,date:TODAY,at:new Date().toISOString()});
+  jset("pep_pending",{remix:list});
+  pushPending();
+  banner(v.name+" re-mix queued — applied on the next Mac sync","ok");
+}
+async function pushPending(){
+  const token=LS.get("pep_token"),gist=LS.get("pep_gist");if(!token||!gist)return;
+  const body={files:{"pending.json":{content:JSON.stringify(
+    Object.assign({},jget("pep_pending"),{updated:new Date().toISOString()}))}}};
+  try{await fetch("https://api.github.com/gists/"+gist,{method:"PATCH",
+    headers:{Authorization:"Bearer "+token,Accept:"application/vnd.github+json"},
+    body:JSON.stringify(body)});}catch(e){}
+}
+
+/* ---- co-draw: compounds sharing a syringe are ONE physical injection ----------
+   BPC-157 + KPV used to be two checkboxes for one shot. Merge them into a single
+   tickable dose that still shows both compounds and their unit counts. */
+function mergeCodraw(list){
+  const out=[],byGroup={};
+  list.forEach(c=>{
+    if(!c.codraw){out.push(c);return;}
+    const g=byGroup[c.codraw+"|"+c.when];
+    if(g){g.sub.push({name:c.name,units:c.units,dose:c.dose});
+          g.sub.sort((a,b)=>a.name.localeCompare(b.name));
+          g.name=g.sub.map(x=>x.name).join(" + ");
+          g.key=g.sub.map(x=>x.name.toLowerCase().replace(/[^a-z0-9]+/g,"-")).sort().join("+");
+          g.units=g.sub.reduce((a,x)=>a+(x.units||0),0);
+          g.dose=g.units+"u total";          // one syringe: the sum is what you draw
+          g.mono=g.sub.map(x=>(x.mono||x.name[0])[0]).join("+");
+          g.color=g.first_color||g.color;
+          return;}
+    const m={...c,note:"one syringe, co-drawn",first_color:c.color,
+             sub:[{name:c.name,units:c.units,dose:c.dose,mono:c.mono}]};
+    byGroup[c.codraw+"|"+c.when]=m;out.push(m);
+  });
+  return out;
+}
+
+/* ---- day-log helpers -------------------------------------------------------
+   Logs used to store list POSITIONS (done:[0,1,2]) which silently changed meaning
+   whenever the protocol changed. They now store per-dose KEYS, plus planned skips
+   with a reason. Old positional entries are still read for history (count only). */
+function dayEntry(k){const e=jget(DAYLOG)[k]||{};return {
+  done:Array.isArray(e.done)?e.done:[], skip:e.skip&&typeof e.skip==="object"?e.skip:{},
+  total:e.total||0, psize:e.psize||0, complete:!!e.complete,
+  legacy:Array.isArray(e.done)&&e.done.length>0&&typeof e.done[0]==="number"};}
+function doneCount(e){return e.done.length;}
+function skipCount(e){return Object.keys(e.skip).length;}
+function settled(e){return doneCount(e)+skipCount(e);}
+
+function writeDay(mut){
+  const dl=jget(DAYLOG), e=dayEntry(TODAY);
+  if(e.legacy){e.done=[];}          // don't mix positions and keys in one entry
+  mut(e);
+  const total=todays.length;
+  /* Guard against half-built data: two days in July 2026 were logged 100% complete
+     off a 1-item card because the app had been handed a partial protocol. */
+  const partial=DATA&&DATA.psize&&total>0&&total<Math.min(DATA.psize,3);
+  dl[TODAY]={done:e.done,skip:e.skip,total,psize:(DATA&&DATA.psize)||0,
+             complete:!partial&&total>0&&settled(e)>=total};
+  jset(DAYLOG,dl);pushLogs();
+}
+
 /* ---- Today: doses + ring + streak + week ---- */
 function renderToday(prn){
-  const dl=jget(DAYLOG);const e=dl[TODAY]||{done:[]};
-  const done=new Set(e.done||[]);
+  const e=dayEntry(TODAY);
+  const done=new Set(e.done), skip=e.skip;
   const tl=document.getElementById("todaylist");
-  tl.innerHTML=todays.map((c,i)=>`<div class="row${done.has(i)?' done':''}" data-i="${i}"><div class="chk">${check}</div>${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">${c.when}${c.note?" · "+c.note:""}</div>${vialWarn(c)}</div><div class="val">${val(c)}</div></div>`).join("")
+  tl.innerHTML=todays.map(c=>{
+    const isDone=done.has(c.key), sk=skip[c.key];
+    const cls=isDone?" done":(sk?" skipped":"");
+    const subs=(c.sub||[]).length>1
+      ?(c.sub||[]).map(x=>`<span class="subpill">${x.name} · ${x.dose} · ${x.units}u</span>`).join(""):"";
+    return `<div class="row${cls}" data-k="${c.key}">
+      <div class="chk">${check}</div>${icon(c)}
+      <div class="meta"><div class="nm">${c.name}</div>
+        <div class="sub">${c.when}${c.note?" · "+c.note:""}</div>
+        ${subs?`<div class="subrow">${subs}</div>`:""}
+        ${sk?`<div class="skiptag">Skipped — ${sk}</div>`:""}
+        ${vialWarn(c)}</div>
+      <div class="val">${val(c)}</div>
+      ${isDone||sk?"":`<button class="skipbtn" data-skip="${c.key}">Skip</button>`}
+    </div>`;}).join("")
     +(prn||[]).map(c=>`<div class="row opt">${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">As needed · ${c.dose}</div></div><div class="val">PRN</div></div>`).join("");
-  tl.querySelectorAll(".row[data-i]").forEach(r=>r.onclick=()=>{
-    const i=+r.dataset.i, dl=jget(DAYLOG), s=new Set((dl[TODAY]||{}).done||[]);
-    s.has(i)?s.delete(i):s.add(i);
-    dl[TODAY]={done:[...s],total:todays.length,complete:[...s].length>=todays.length&&todays.length>0};
-    jset(DAYLOG,dl);
-    r.classList.toggle("done");
-    updateStats();
-    pushLogs();
+
+  tl.querySelectorAll(".row[data-k]").forEach(r=>{
+    r.onclick=(ev)=>{
+      if(ev.target.closest(".skipbtn"))return;
+      const k=r.dataset.k;
+      writeDay(e=>{const i=e.done.indexOf(k);
+        if(i>=0)e.done.splice(i,1); else {e.done.push(k);delete e.skip[k];}});
+      if((jget(DAYLOG)[TODAY].done||[]).includes(k))autoSite();
+      renderToday(prn);
+    };
   });
+  tl.querySelectorAll(".skipbtn").forEach(b=>{
+    b.onclick=(ev)=>{ev.stopPropagation();askSkip(b.dataset.skip,()=>renderToday(prn));};
+  });
+  renderNextUp();
   updateStats();
 }
+
+/* ---- skip-with-reason sheet ---- */
+function askSkip(key,after){
+  const reasons=(DATA&&DATA.skip_reasons)||["Ate too late to fast","Travelling","Out of vial / expired","Other"];
+  const item=todays.find(c=>c.key===key)||{name:"this dose"};
+  document.getElementById("ask-ttl").textContent="Skip "+item.name+"?";
+  document.getElementById("ask-sub").textContent="Logged as a planned skip, not a miss — your streak survives.";
+  const box=document.getElementById("ask-opts");
+  box.innerHTML=reasons.map(r=>`<button class="asksheet-opt">${r}</button>`).join("");
+  box.querySelectorAll("button").forEach((b,i)=>b.onclick=()=>{
+    writeDay(e=>{const j=e.done.indexOf(key);if(j>=0)e.done.splice(j,1);e.skip[key]=reasons[i];});
+    close();after&&after();
+  });
+  const sheet=document.getElementById("asksheet");
+  const close=()=>sheet.classList.remove("show");
+  document.getElementById("ask-cancel").onclick=close;
+  sheet.onclick=(ev)=>{if(ev.target===sheet)close();};
+  sheet.classList.add("show");
+}
+
+/* ---- "next up" line: the most time-sensitive vial action, on the Today card ---- */
+function renderNextUp(){
+  const el=document.getElementById("nextup");if(!el)return;
+  const up=((DATA&&DATA.timeline)||[]).filter(t=>t.d>=TODAY);
+  if(!up.length){el.innerHTML="";return;}
+  const t=up[0],d=new Date(t.d+"T00:00:00");
+  const days=Math.round((d-new Date(TODAY+"T00:00:00"))/86400000);
+  const when=days<=0?"today":days===1?"tomorrow":`in ${days} days`;
+  const nm=t.label.split(" — ")[0];
+  el.innerHTML=`<span>🧪</span><div>Next vial job: <b>${nm}</b> — <span class="${days<=1?'soon':''}">${when}</span>
+    <div style="color:var(--sec);font-size:12px;margin-top:1px">${t.label.split(" — ")[1]||"re-mix"}</div></div>`;
+}
+
 function updateStats(){
-  const dl=jget(DAYLOG);const e=dl[TODAY]||{done:[]};
-  const total=todays.length, done=(e.done||[]).length;
+  const dl=jget(DAYLOG), e=dayEntry(TODAY);
+  const total=todays.length, done=doneCount(e), sk=skipCount(e);
+  const owed=Math.max(0,total-sk);        // planned skips leave the plan entirely
   const circ=2*Math.PI*28;
   document.getElementById("ringfg").style.strokeDasharray=circ;
-  document.getElementById("ringfg").style.strokeDashoffset=circ*(1-(total?done/total:0));
-  document.getElementById("ringnum").textContent=done+"/"+total;
-  // streak
+  document.getElementById("ringfg").style.strokeDashoffset=circ*(1-(owed?done/owed:1));
+  document.getElementById("ringnum").textContent=done+"/"+owed;
+  // streak — a planned skip keeps the day intact
+  const isComplete=(k)=>{const x=dl[k];if(!x)return false;
+    if(x.complete)return true;
+    const d=(x.done||[]).length,s=x.skip?Object.keys(x.skip).length:0;
+    return (x.total||0)>0&&d+s>=x.total;};
   let s=0;const cur=new Date(_now);
-  const tk=iso(cur);
-  if(!(dl[tk]&&dl[tk].complete))cur.setDate(cur.getDate()-1);
-  while(true){const k=iso(cur);if(dl[k]&&dl[k].complete){s++;cur.setDate(cur.getDate()-1);}else break;}
+  if(!isComplete(iso(cur)))cur.setDate(cur.getDate()-1);
+  while(isComplete(iso(cur))){s++;cur.setDate(cur.getDate()-1);}
   const se=document.getElementById("streak");
   se.className="streak"+(s?"":" none");
-  se.textContent=s?`🔥 ${s}-day streak`:"Start your streak today";
+  const skTxt=sk?` · ${sk} planned skip${sk>1?"s":""}`:"";
+  se.textContent=(s?`🔥 ${s}-day streak`:"Start your streak today")+skTxt;
   // week strip
   const wk=document.getElementById("week");let h="";
   for(let i=6;i>=0;i--){const d=new Date(_now);d.setDate(d.getDate()-i);const k=iso(d);const en=dl[k];
-    let cls="";if(en&&en.complete)cls="full";else if(en&&(en.done||[]).length)cls="part";
+    let cls="";if(isComplete(k))cls="full";
+    else if(en&&((en.done||[]).length||(en.skip&&Object.keys(en.skip).length)))cls="part";
     if(k===TODAY)cls+=" today";
     h+=`<div class="wk ${cls}"><div class="d"></div>${DOW[d.getDay()][0]}</div>`;}
   wk.innerHTML=h;
@@ -427,12 +628,24 @@ function updateStats(){
 
 /* ---- Injection site map ---- */
 const ZPOS=[[82,118],[118,118],[64,104],[136,104],[82,190],[118,190]];
+let SUGGESTED_SITE=0;
+/* Marking a dose done also logs the suggested site, so rotation stops being a
+   separate chore you remember 11 days out of 28. Tap the map to correct it. */
+function autoSite(){
+  const sl=jget(SITELOG);
+  if((sl[TODAY]||[]).length)return;                 // already logged today
+  sl[TODAY]=[SUGGESTED_SITE];jset(SITELOG,sl);
+  if(DATA&&DATA.sites)renderSites(DATA.sites);
+  banner("Site logged: "+((DATA&&DATA.sites&&DATA.sites[SUGGESTED_SITE])||"")+" — tap the map to change","ok");
+  pushLogs();
+}
 function renderSites(SITES){
   const sl=jget(SITELOG);const todayUsed=new Set(sl[TODAY]||[]);
   // suggestion: least-recently-used zone
   const last={};Object.keys(sl).sort().forEach(d=>(sl[d]||[]).forEach(z=>last[z]=d));
   let sug=0,best="9999";
   for(let i=0;i<SITES.length;i++){const lu=last[i]!==undefined?last[i]:"0000";if(lu<best){best=lu;sug=i;}}
+  SUGGESTED_SITE=sug;
   const g=document.getElementById("zones");
   g.innerHTML=SITES.map((s,i)=>`<circle class="zone${todayUsed.has(i)?' used':''}${i===sug?' sug':''}" data-z="${i}" cx="${ZPOS[i][0]}" cy="${ZPOS[i][1]}" r="13"/>`).join("");
   g.querySelectorAll(".zone").forEach(z=>z.onclick=()=>{
@@ -469,7 +682,9 @@ function drawCal(){
   for(let dn=1;dn<=days;dn++){if(col===7){h+="</tr><tr>";col=0;}
     const k=`${y}-${pad(m+1)}-${pad(dn)}`;const e=CAL_EVENTS[k];let dots="";
     if(e&&e.reta)dots+="<span class='dot r'></span>";if(e&&e.tw)dots+="<span class='dot tw'></span>";if(e&&e.evt)dots+="<span class='dot e'></span>";if(CAL_REMIX.has(k))dots+="<span class='dot m'></span>";
-    const en=dl[k];let lc="";if(en&&en.complete)lc=" logged";else if(en&&(en.done||[]).length)lc=" partial";
+    const en=dl[k];let lc="";const _sk=en&&en.skip?Object.keys(en.skip).length:0;
+    if(en&&(en.complete||((en.total||0)>0&&(en.done||[]).length+_sk>=en.total)))lc=" logged";
+    else if(en&&((en.done||[]).length||_sk))lc=" partial";
     h+=`<td data-k="${k}" class="${k===TODAY?'today':''}${lc}"><span class="dn">${dn}</span><div class="dots">${dots}</div></td>`;col++;}
   while(col<7){h+="<td class='out'>.</td>";col++;}h+="</tr></tbody></table>";
   document.getElementById("calbody").innerHTML=h;
@@ -477,15 +692,31 @@ function drawCal(){
   if(months[cur][1]===_now.getFullYear()&&months[cur][2]===_now.getMonth())showCalDay(TODAY);
   else document.getElementById("calday").textContent="Tap a day to see what's on it.";
 }
+/* How many routine injections fall on a given date — the same rules the Today card
+   uses. Without this the calendar said "nothing scheduled" on days with four doses. */
+function doseCountFor(k){
+  if(!DATA)return 0;
+  const C=DATA.compounds||[],dow=new Date(k+"T00:00:00").getDay();
+  let n=[];
+  if((DATA.wed||[]).includes(k)&&DATA.weekly&&DATA.weekly.name)n.push(DATA.weekly);
+  C.filter(c=>c.group==="midday").forEach(c=>n.push(c));
+  C.filter(c=>c.group==="twice").forEach(c=>{if(dow===1||dow===4||c.first===k)n.push(c);});
+  C.filter(c=>c.group==="prebed").forEach(c=>n.push(c));
+  return mergeCodraw(n).length;
+}
 function showCalDay(k){
   const e=CAL_EVENTS[k]||{},parts=[];
+  const nd=doseCountFor(k);
+  if(nd)parts.push(nd+(nd===1?" injection":" injections"));
   if(e.reta)parts.push("Retatrutide "+e.reta);
   if(e.tw)parts.push("TB-500 dose");
   if(e.evt)e.evt.forEach(x=>parts.push(x));
   if(CAL_REMIX.has(k))parts.push("Re-mix a fresh vial");
   const dl=jget(DAYLOG),en=dl[k];let status="";
-  if(en&&en.complete)status=" · ✓ Logged";
-  else if(en&&(en.done||[]).length)status=` · ${(en.done||[]).length}/${en.total||"?"} logged`;
+  const nsk=en&&en.skip?Object.keys(en.skip).length:0;
+  if(en&&en.complete)status=" · ✓ Logged"+(nsk?` (${nsk} planned skip${nsk>1?"s":""})`:"");
+  else if(en&&((en.done||[]).length||nsk))
+    status=` · ${(en.done||[]).length}/${en.total||"?"} logged`+(nsk?`, ${nsk} skipped`:"");
   const d=new Date(k+"T00:00"),lbl=DOW[d.getDay()]+", "+MON[d.getMonth()]+" "+d.getDate();
   const head=parts.length?`<b>${lbl}</b> — ${parts.join(" · ")}${status}`:`<b>${lbl}</b> — nothing scheduled${status}`;
   let action="";
