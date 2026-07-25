@@ -12,33 +12,44 @@
 <title>Peptides</title>
 <style>
 :root{
-  --bg1:#eef1f7; --bg2:#e3e7f0; --ink:#1c1c1e; --ink2:#3a3a3c; --sec:#8a8a8e;
+  --bg1:#eef1f7; --bg2:#e3e7f0; --ink:#1c1c1e; --ink2:#3a3a3c; --sec:#66666d;
   --glass:rgba(255,255,255,.72); --glass-brd:rgba(255,255,255,.6);
   --card:rgba(255,255,255,.78); --hair:rgba(60,60,67,.13);
-  --pill:rgba(118,118,128,.12); --blue:#0A84FF; --green:#34C759; --amber:#FF9F0A;
+  --pill:rgba(118,118,128,.12); --blue:#0675d8; --green:#16883c; --amber:#a85a00; --red:#c5281c;
   --shadow:0 10px 30px rgba(31,38,72,.12);
 }
 @media (prefers-color-scheme: dark){
   :root{
-    --bg1:#0b0b0f; --bg2:#16161c; --ink:#f5f5f7; --ink2:#d8d8de; --sec:#9a9aa2;
+    --bg1:#0b0b0f; --bg2:#16161c; --ink:#f5f5f7; --ink2:#d8d8de; --sec:#b0b0b8;
     --glass:rgba(30,30,38,.66); --glass-brd:rgba(255,255,255,.10);
-    --card:rgba(28,28,36,.72); --hair:rgba(255,255,255,.10);
+    --card:rgba(28,28,36,.92); --hair:rgba(255,255,255,.15);
+    --blue:#409cff; --green:#58d477; --amber:#ffb340; --red:#ff6961;
     --pill:rgba(120,120,130,.24); --shadow:0 12px 34px rgba(0,0,0,.5);
   }
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0}
+button,input{font:inherit}
+button:focus-visible,input:focus-visible,[role="button"]:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
 body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Segoe UI",Helvetica,Arial,sans-serif;color:var(--ink);
   background:radial-gradient(120% 80% at 80% -10%, rgba(10,132,255,.18), transparent 60%),radial-gradient(120% 80% at -10% 10%, rgba(175,82,222,.16), transparent 55%),linear-gradient(180deg,var(--bg1),var(--bg2));
   background-attachment:fixed;min-height:100vh;display:flex;justify-content:center;-webkit-font-smoothing:antialiased;}
 .app{width:100%;max-width:440px;padding:max(14px,env(safe-area-inset-top)) 16px calc(110px + env(safe-area-inset-bottom));position:relative}
 .h-top{display:flex;justify-content:space-between;align-items:flex-end;margin:8px 4px 14px}
 .h-top .lt{font-size:32px;font-weight:800;letter-spacing:-.02em;line-height:1}
-.h-top .dt{font-size:13px;color:var(--sec);margin-top:5px;font-weight:500}
-.gear{width:38px;height:38px;border-radius:50%;background:var(--pill);border:0;color:var(--ink2);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.h-top .dt{font-size:14px;color:var(--sec);margin-top:5px;font-weight:500}
+.gear{width:44px;height:44px;border-radius:50%;background:var(--pill);border:0;color:var(--ink2);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .gear svg{width:20px;height:20px}
 .glass{background:var(--glass);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);border:1px solid var(--glass-brd);border-radius:26px;box-shadow:var(--shadow)}
-.sec-h{font-size:13px;font-weight:700;color:var(--sec);margin:22px 8px 8px}
+.sec-h{font-size:14px;font-weight:750;color:var(--sec);margin:22px 8px 8px}
+.syncstatus{display:flex;align-items:flex-start;gap:8px;margin:0 4px 12px;padding:10px 12px;border:1px solid var(--hair);border-radius:14px;background:var(--glass);color:var(--ink2);font-size:13px;line-height:1.4}
+.syncstatus .status-icon{font-weight:800;flex:0 0 auto}
+.syncstatus.ok .status-icon{color:var(--green)}.syncstatus.warn .status-icon{color:var(--amber)}.syncstatus.err .status-icon{color:var(--red)}
+.loadstate{padding:28px 22px;text-align:center;margin-top:4px}
+.loadstate .load-title{font-size:18px;font-weight:800}.loadstate .load-sub{font-size:14px;line-height:1.5;color:var(--sec);margin-top:7px}
+.is-loading .view,.is-loading #foot{display:none}
+.info-note{margin:0 4px 12px;padding:12px 14px;border-radius:14px;background:var(--pill);color:var(--ink2);font-size:13px;line-height:1.45}
+.info-note strong{color:var(--ink)}
 /* hero */
 .hero{padding:18px;margin-top:4px}
 .herotop{display:flex;gap:16px;align-items:center;margin-bottom:8px}
@@ -52,36 +63,42 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display"
 .streak{font-size:13px;font-weight:700;color:var(--amber);margin-top:3px}
 .streak.none{color:var(--sec);font-weight:600}
 .week{display:flex;gap:5px;margin-top:9px}
-.wk{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:9px;color:var(--sec);flex:1}
+.wk{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--sec);flex:1}
 .wk .d{width:10px;height:10px;border-radius:50%;background:var(--pill)}
 .wk.full .d{background:var(--green)} .wk.part .d{background:var(--amber)}
 .wk.today .d{outline:2px solid var(--blue);outline-offset:1px}
 /* dose row */
-.row{display:flex;align-items:center;gap:13px;padding:11px 0;border-top:1px solid var(--hair)}
+.row{display:flex;align-items:center;gap:11px;padding:12px 0;border-top:1px solid var(--hair)}
 .row:first-of-type{border-top:0}
-.row .chk{width:25px;height:25px;border-radius:50%;border:2px solid var(--sec);flex:0 0 auto;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
+.row .chk{width:44px;height:44px;border-radius:50%;border:2px solid var(--sec);background:transparent;color:inherit;padding:0;flex:0 0 auto;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
 .row.done .chk{background:var(--blue);border-color:var(--blue)}
 .row .chk svg{opacity:0;transition:.15s}.row.done .chk svg{opacity:1}
 .row.done .nm{text-decoration:line-through;color:var(--sec)}
 .ic{width:42px;height:42px;border-radius:13px;flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;box-shadow:0 3px 8px rgba(0,0,0,.18);line-height:1}
 .ic .mn{font-weight:800;font-size:12.5px;letter-spacing:-.02em}
-.ic .un{font-weight:600;font-size:9px;opacity:.92;margin-top:2px}
+.ic .un{font-weight:600;font-size:10.5px;opacity:.95;margin-top:2px}
 .row .meta{flex:1;min-width:0}.row .nm{font-size:16px;font-weight:600;line-height:1.2}
-.row .sub{font-size:12.5px;color:var(--sec);margin-top:1px}
+.row .sub{font-size:13px;color:var(--sec);margin-top:2px;line-height:1.35}
 .row .val{font-size:14px;color:var(--ink2);font-weight:600;white-space:nowrap}
 .row.opt .ic{opacity:.9}
+#todaylist .row[data-k]{display:grid;grid-template-columns:44px 42px minmax(86px,1fr) auto;align-items:center;gap:8px 10px}
+#todaylist .row[data-k]>.chk{grid-column:1;grid-row:1}
+#todaylist .row[data-k]>.ic{grid-column:2;grid-row:1}
+#todaylist .row[data-k]>.meta{grid-column:3;grid-row:1}
+#todaylist .row[data-k]>.val{grid-column:4;grid-row:1}
+#todaylist .row[data-k]>.skipbtn{grid-column:3/5;grid-row:2;justify-self:start;margin:0}
 /* grouped list */
 .list{padding:4px 16px}
-.list .grp{font-size:11.5px;font-weight:700;color:var(--sec);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 2px}
+.list .grp{font-size:12.5px;font-weight:750;color:var(--sec);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 2px}
 .list .grp:first-child{margin-top:8px}
 /* site map */
 .site-card{padding:16px;display:flex;gap:16px;align-items:center}
 .bodymap{width:124px;height:172px;flex:0 0 auto}
 .body{fill:var(--pill);stroke:var(--hair);stroke-width:1.5}
-.zone{fill:rgba(10,132,255,.20);stroke:var(--blue);stroke-width:1.5;cursor:pointer;transition:.15s}
+.zone-hit{fill:transparent;cursor:pointer}.zone{fill:rgba(10,132,255,.20);stroke:var(--blue);stroke-width:1.5;pointer-events:none;transition:.15s}
 .zone.used{fill:var(--blue)}
 .zone.sug{stroke:var(--amber);stroke-width:3}
-.site-info{flex:1;font-size:13.5px}
+.site-info{flex:1;font-size:14px}
 #site-sug b{color:var(--amber)}
 .site-sub{color:var(--sec);font-size:12px;margin-top:6px;line-height:1.5}
 /* agenda */
@@ -105,7 +122,7 @@ details.proto>summary{cursor:pointer;list-style:none;display:flex;align-items:ce
 details.proto>summary::-webkit-details-marker{display:none}
 details.proto>summary::after{content:"▸";font-size:12px;color:var(--sec);transition:transform .15s}
 details.proto[open]>summary::after{transform:rotate(90deg)}
-.skipbtn{flex:0 0 auto;font-size:11px;font-weight:700;color:var(--sec);background:var(--pill);border:0;border-radius:14px;padding:5px 10px;margin-left:8px;cursor:pointer}
+.skipbtn{flex:0 0 auto;min-width:44px;min-height:44px;font-size:12px;font-weight:700;color:var(--sec);background:var(--pill);border:0;border-radius:14px;padding:8px 10px;margin-left:4px;cursor:pointer}
 .skipbtn:active{opacity:.6}
 .row.skipped{opacity:.62}
 .row.skipped .nm{text-decoration:line-through;text-decoration-color:rgba(120,120,128,.6)}
@@ -119,10 +136,10 @@ details.proto[open]>summary::after{transform:rotate(90deg)}
 .asksheet.show{display:flex}
 .asksheet-in{background:var(--card);width:100%;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -8px 40px rgba(0,0,0,.2)}
 .asksheet-in h3{margin:0 0 4px;font-size:17px}
-.asksheet-in p{margin:0 0 14px;font-size:13px;color:var(--sec)}
-.asksheet-opt{width:100%;text-align:left;font-size:15px;font-weight:600;padding:13px 14px;margin-bottom:8px;border:0;border-radius:12px;background:var(--pill);color:var(--ink);cursor:pointer}
+.asksheet-in p{margin:0 0 14px;font-size:14px;line-height:1.45;color:var(--sec)}
+.asksheet-opt{width:100%;min-height:48px;text-align:left;font-size:15px;font-weight:650;padding:13px 14px;margin-bottom:8px;border:0;border-radius:12px;background:var(--pill);color:var(--ink);cursor:pointer}
 .asksheet-opt:active{opacity:.65}
-.asksheet-cancel{width:100%;font-size:15px;font-weight:700;padding:13px;border:0;border-radius:12px;background:transparent;color:var(--sec);cursor:pointer}
+.asksheet-cancel{width:100%;min-height:48px;font-size:15px;font-weight:700;padding:13px;border:0;border-radius:12px;background:transparent;color:var(--sec);cursor:pointer}
 .vw{font-size:11.5px;font-weight:600;line-height:1.35;margin-top:4px;padding:5px 8px;border-radius:8px}
 .vw.a{background:rgba(255,159,10,.14);color:var(--amber)}
 .vw.r{background:rgba(255,69,58,.14);color:#FF453A}
@@ -137,8 +154,8 @@ details.proto[open]>summary::after{transform:rotate(90deg)}
 .rx.open .chev{transform:rotate(90deg)}
 .rxd{display:none;padding:2px 4px 12px 55px}
 .rx.open .rxd{display:block}
-.rxd .rd{font-size:12.5px;color:var(--ink2);line-height:1.5;margin-top:7px}
-.rxd .rdl{font-weight:700;color:var(--sec);text-transform:uppercase;font-size:10.5px;letter-spacing:.03em;display:block;margin-bottom:1px}
+.rxd .rd{font-size:14px;color:var(--ink2);line-height:1.55;margin-top:9px}
+.rxd .rdl{font-weight:750;color:var(--sec);text-transform:uppercase;font-size:11.5px;letter-spacing:.03em;display:block;margin-bottom:2px}
 .rxd .rdsum{font-style:italic;color:var(--sec)}
 /* calculator */
 .calc{padding:14px 16px}
@@ -150,32 +167,35 @@ details.proto[open]>summary::after{transform:rotate(90deg)}
 /* calendar */
 .cal{padding:14px 16px 18px}
 .seg{display:flex;background:var(--pill);border-radius:11px;padding:3px;margin-bottom:14px}
-.seg button{flex:1;border:0;background:transparent;color:var(--ink2);font-size:13px;font-weight:600;padding:6px 0;border-radius:9px;cursor:pointer;font-family:inherit}
+.seg button{flex:1;min-height:44px;border:0;background:transparent;color:var(--ink2);font-size:14px;font-weight:650;padding:8px 0;border-radius:9px;cursor:pointer;font-family:inherit}
 .seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12)}
 .cal table{width:100%;border-collapse:collapse;table-layout:fixed}
-.cal th{font-size:10.5px;color:var(--sec);font-weight:600;padding-bottom:8px}
-.cal td{height:42px;text-align:center;vertical-align:top;font-size:13px;font-weight:500;color:var(--ink2);position:relative;padding-top:5px}
+.cal th{font-size:12px;color:var(--sec);font-weight:650;padding-bottom:8px}
+.cal td{height:48px;text-align:center;vertical-align:top;font-size:14px;font-weight:550;color:var(--ink2);position:relative;padding-top:4px;cursor:pointer;border-radius:8px}
 .cal td.out{color:transparent}
-.cal td .dn{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%}
+.cal td .dn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%}
 .cal td.today .dn{background:var(--blue);color:#fff}
 .cal td.logged .dn{box-shadow:0 0 0 2px var(--green)}
 .cal td.partial .dn{box-shadow:0 0 0 2px var(--sec)}
 .cal td.today.logged .dn,.cal td.today.partial .dn{box-shadow:none}
-.caltog{color:var(--blue);font-weight:600;cursor:pointer;white-space:nowrap}
-.dots{display:flex;gap:3px;justify-content:center;margin-top:3px;height:5px}
-.dot{width:5px;height:5px;border-radius:50%}
-.dot.r{background:var(--blue)}.dot.e{background:#FF9F0A}.dot.m{background:#30B0C7}.dot.tw{background:#5E5CE6}
-.calday{margin-top:11px;font-size:12.5px;line-height:1.4;color:var(--txt);text-align:center;min-height:18px}
-.legend{display:flex;gap:13px;justify-content:center;flex-wrap:wrap;margin-top:14px;font-size:11px;color:var(--sec)}
-.legend span{display:inline-flex;align-items:center;gap:5px}.legend i{width:7px;height:7px;border-radius:50%;display:inline-block}
-.legend i.ring{background:transparent;box-shadow:0 0 0 2px var(--green)}
+.caltog{min-height:44px;color:var(--blue);font-weight:700;cursor:pointer;white-space:nowrap;border:0;background:transparent;padding:8px 4px;text-decoration:underline}
+.dots{display:flex;gap:2px;justify-content:center;margin-top:1px;min-height:10px}
+.dot{width:10px;height:10px;border-radius:3px;color:#fff;font-size:7px;font-weight:800;line-height:10px;text-align:center;font-style:normal}
+.dot.r{background:var(--blue)}.dot.e{background:#a85a00}.dot.m{background:#18798a}.dot.tw{background:#5E5CE6}
+.daystate{position:absolute;right:2px;top:2px;font-size:10px;font-weight:900;color:var(--green)}.partial .daystate{color:var(--sec)}
+.calday{margin-top:13px;font-size:14px;line-height:1.5;color:var(--ink2);text-align:center;min-height:22px}
+.legend{display:flex;gap:10px 13px;justify-content:center;flex-wrap:wrap;margin-top:14px;font-size:12px;color:var(--sec)}
+.legend span{display:inline-flex;align-items:center;gap:5px}.legend i{width:16px;height:16px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;font-style:normal}
+.legend i.r{background:var(--blue)}.legend i.tw{background:#5E5CE6}.legend i.e{background:#a85a00}.legend i.m{background:#18798a}
+.legend i.logged{color:var(--green);background:transparent;border:2px solid var(--green)}.legend i.partial{color:var(--sec);background:transparent;border:2px solid var(--sec)}
 /* tabs */
-.tabs{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:408px;display:flex;justify-content:space-around;padding:10px 8px;border-radius:26px;z-index:20}
-.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--sec);border:0;background:transparent;cursor:pointer;font-family:inherit;flex:1}
+.tabs{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:408px;display:flex;justify-content:space-around;padding:6px 8px;border-radius:26px;z-index:20}
+.tab{min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:12px;font-weight:650;color:var(--sec);border:0;background:transparent;cursor:pointer;font-family:inherit;flex:1}
 .tab.on{color:var(--blue)}.tab svg{width:23px;height:23px}
-.foot{font-size:10.5px;color:var(--sec);text-align:center;margin:18px 8px 0;line-height:1.5}
-.banner{margin:10px 4px 0;padding:11px 14px;border-radius:16px;font-size:12.5px;font-weight:500;display:none}
-.banner.show{display:block}.banner.err{background:rgba(255,69,58,.14);color:#FF453A}.banner.ok{background:rgba(52,199,89,.14);color:var(--green)}
+.foot{font-size:12px;color:var(--sec);text-align:center;margin:18px 8px 0;line-height:1.5}
+.banner{margin:10px 4px 12px;padding:11px 14px;border-radius:16px;font-size:13px;font-weight:550;display:none;align-items:center;gap:10px}
+.banner.show{display:flex}.banner.err{background:rgba(255,69,58,.14);color:var(--red)}.banner.ok{background:rgba(52,199,89,.14);color:var(--green)}
+.banner .banner-text{flex:1}.banner .banner-action{min-height:40px;border:1px solid currentColor;border-radius:11px;background:transparent;color:inherit;padding:7px 11px;font-weight:750;cursor:pointer}
 /* setup */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
 .overlay.show{display:flex}
@@ -186,15 +206,23 @@ details.proto[open]>summary::after{transform:rotate(90deg)}
 .sheet .btns{display:flex;gap:10px;margin-top:18px}
 .sheet button{flex:1;padding:13px;border-radius:14px;border:0;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
 .sheet .save{background:var(--blue);color:#fff}.sheet .cancel{background:var(--pill);color:var(--ink)}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
 </style>
 </head>
-<body>
+<body class="is-loading">
 <div class="app">
   <div class="h-top">
     <div><div class="lt">Peptides</div><div class="dt" id="todaydate"></div></div>
-    <button class="gear" id="gear" aria-label="Setup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 1.1-2.7H1a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 2.6 7a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 9 2.6h.1A1.6 1.6 0 0 0 11 1a2 2 0 1 1 4 0v.1A1.6 1.6 0 0 0 17 2.6a1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7h.2a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.4 1.1z"/></svg></button>
+    <button type="button" class="gear" id="gear" aria-label="Open app setup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 1.1-2.7H1a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 2.6 7a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 9 2.6h.1A1.6 1.6 0 0 0 11 1a2 2 0 1 1 4 0v.1A1.6 1.6 0 0 0 17 2.6a1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7h.2a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.4 1.1z"/></svg></button>
   </div>
-  <div class="banner" id="banner"></div>
+  <div class="syncstatus warn" id="syncstatus" role="status" aria-live="polite"><span class="status-icon" aria-hidden="true">…</span><span id="syncstatus-text">Checking for your latest schedule…</span></div>
+  <div class="banner" id="banner" role="status" aria-live="polite"></div>
+  <div class="glass loadstate" id="loadstate" role="status">
+    <div class="load-title">Loading your schedule</div>
+    <div class="load-sub" id="loadstate-sub">Checking this device for saved schedule data.</div>
+  </div>
 
   <div class="view" id="v-today">
     <div class="glass hero">
@@ -226,19 +254,21 @@ details.proto[open]>summary::after{transform:rotate(90deg)}
   </div>
 
   <div class="view" id="v-cal" hidden>
-    <div class="sec-h">Calendar</div>
+    <div class="sec-h">Schedule calendar</div>
+    <div class="info-note"><strong>What this shows:</strong> scheduled items and completion history. This web app does not send alerts; phone reminders only come from a separate calendar subscription, if you enabled one.</div>
     <div class="glass cal">
       <div class="seg" id="seg"></div>
       <div id="calbody"></div>
-      <div class="legend"><span><i style="background:var(--blue)"></i>Reta</span><span><i style="background:#5E5CE6"></i>TB-500</span><span><i style="background:#FF9F0A"></i>Change</span><span><i style="background:#30B0C7"></i>Re-mix</span><span><i class="ring"></i>Logged</span><span><i style="background:transparent;box-shadow:0 0 0 2px var(--sec)"></i>Partial</span></div>
+      <div class="legend" aria-label="Calendar key"><span><i class="r">R</i>Reta</span><span><i class="tw">T</i>TB-500</span><span><i class="e">C</i>Change</span><span><i class="m">M</i>Re-mix</span><span><i class="logged">✓</i>Completed</span><span><i class="partial">•</i>Partly completed</span></div>
       <div id="calday" class="calday">Tap a day to see what's on it.</div>
     </div>
   </div>
 
   <div class="view" id="v-vials" hidden>
-    <div class="sec-h">Upcoming</div>
+    <div class="sec-h">Upcoming vial tasks</div>
     <div class="glass agenda" id="agenda"></div>
-    <div class="sec-h">Inventory</div>
+    <div class="sec-h">Vial inventory</div>
+    <div class="info-note">Status words and symbols repeat the color meaning. Tap an active vial to load its saved values into the calculator; this does not change inventory.</div>
     <div class="glass list" id="inventory"></div>
     <div class="sec-h">Reconstitution Calculator</div>
     <div class="glass calc">
@@ -250,29 +280,30 @@ details.proto[open]>summary::after{transform:rotate(90deg)}
   </div>
 
   <div class="view" id="v-research" hidden>
-    <div class="sec-h">Research Library</div>
+    <div class="sec-h">Research notes</div>
+    <div class="info-note"><strong>Reference only:</strong> evidence may be limited or uncertain. “Current inventory” and “Backup inventory” describe vial status, not the strength of the research.</div>
     <div class="glass list" id="research"></div>
-    <div class="foot" style="margin-top:14px">View-only · full reports live in your Peptides folder on your Mac</div>
+    <div class="foot" style="margin-top:14px">View-only summary · full reports are separate from this web app</div>
   </div>
 
   <div class="foot" id="foot"></div>
 </div>
 
-<nav class="glass tabs">
-  <button class="tab on" data-v="v-today"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 3 9v12h6v-7h6v7h6V9z"/></svg>Today</button>
-  <button class="tab" data-v="v-cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Calendar</button>
-  <button class="tab" data-v="v-vials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6M10 3v5l-4 9a3 3 0 0 0 3 4h6a3 3 0 0 0 3-4l-4-9V3"/></svg>Vials</button>
-  <button class="tab" data-v="v-research"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2z"/><path d="M8 3v18"/></svg>Research</button>
+<nav class="glass tabs" aria-label="Main sections">
+  <button type="button" class="tab on" data-v="v-today" aria-current="page"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2 3 9v12h6v-7h6v7h6V9z"/></svg>Today</button>
+  <button type="button" class="tab" data-v="v-cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Calendar</button>
+  <button type="button" class="tab" data-v="v-vials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 3h6M10 3v5l-4 9a3 3 0 0 0 3 4h6a3 3 0 0 0 3-4l-4-9V3"/></svg>Vials</button>
+  <button type="button" class="tab" data-v="v-research"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2z"/><path d="M8 3v18"/></svg>Research</button>
 </nav>
 
-<div class="asksheet" id="asksheet"><div class="asksheet-in">
+<div class="asksheet" id="asksheet" role="dialog" aria-modal="true" aria-labelledby="ask-ttl" aria-describedby="ask-sub"><div class="asksheet-in">
   <h3 id="ask-ttl">Skip this dose?</h3>
   <p id="ask-sub">Logged as a planned skip — your streak survives.</p>
   <div id="ask-opts"></div>
-  <button class="asksheet-cancel" id="ask-cancel">Cancel</button>
+  <button type="button" class="asksheet-cancel" id="ask-cancel">Cancel</button>
 </div></div>
-<div class="overlay" id="overlay"><div class="glass sheet">
-  <h2>Setup</h2>
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="setup-title"><div class="glass sheet">
+  <h2 id="setup-title">Setup</h2>
   <p>Schedule data is downloaded read-only from an unlisted GitHub Gist and cached on this device. Dose and site logs recorded by this version stay only in this browser and are not uploaded. Anyone with the Gist ID can read the schedule.</p>
   <p>For security, this app no longer accepts or stores GitHub access tokens. Revoke any token previously entered here.</p>
   <label for="in-gist">Gist ID</label><input id="in-gist" type="text" placeholder="e.g. a1b2c3d4…" autocomplete="off" autocapitalize="off" spellcheck="false">
@@ -312,7 +343,33 @@ function sanitizeForRender(value,depth=0){
 const safeColor=value=>/^#[0-9a-f]{6}$/i.test(String(value||""))?String(value):"#8a8a8e";
 const _now=new Date();const TODAY=iso(_now);
 document.getElementById("todaydate").textContent=DOW[_now.getDay()]+", "+MON[_now.getMonth()]+" "+_now.getDate();
-function banner(m,c){const b=document.getElementById("banner");b.textContent=m;b.className="banner show "+c;if(c==="ok")setTimeout(()=>b.className="banner",2200);}
+let bannerTimer=null,HAS_RENDERED=false,LAST_BUILT="";
+function banner(m,c,actionLabel,action){
+  const b=document.getElementById("banner");
+  clearTimeout(bannerTimer);
+  b.replaceChildren();
+  const text=document.createElement("span");text.className="banner-text";text.textContent=m;b.appendChild(text);
+  if(actionLabel&&action){
+    const btn=document.createElement("button");btn.type="button";btn.className="banner-action";btn.textContent=actionLabel;
+    btn.onclick=()=>{clearTimeout(bannerTimer);b.className="banner";action();};b.appendChild(btn);
+  }
+  b.className="banner show "+c;
+  if(c==="ok")bannerTimer=setTimeout(()=>b.className="banner",actionLabel?7000:3200);
+}
+function setLoading(active,message){
+  document.body.classList.toggle("is-loading",active);
+  const box=document.getElementById("loadstate");box.hidden=!active;
+  if(message)document.getElementById("loadstate-sub").textContent=message;
+}
+function setSyncStatus(message,tone="warn",icon="…"){
+  const el=document.getElementById("syncstatus");
+  el.className="syncstatus "+tone;
+  el.querySelector(".status-icon").textContent=icon;
+  document.getElementById("syncstatus-text").textContent=message;
+}
+function savedScheduleText(){
+  return LAST_BUILT?`schedule last updated ${LAST_BUILT}`:"the last schedule saved on this device";
+}
 
 /* local logs */
 const jget=(k)=>{try{return JSON.parse(LS.get(k,"{}"))}catch(e){return {}}};
@@ -325,8 +382,12 @@ async function gistFetch(){
   if(!gist){
     /* Only demand setup on a genuine first run. If there is cached data, show it
        and say so quietly instead of blocking the whole app behind a modal. */
-    if(LS.get("pep_data"))banner("Offline — showing last saved data","err");
-    else openSetup();
+    if(LS.get("pep_data"))setSyncStatus("Showing the saved schedule. Add the schedule source in Setup to check for updates.","warn","!");
+    else{
+      setLoading(true,"Setup is needed before a schedule can be shown.");
+      setSyncStatus("Schedule source not set up on this device.","warn","!");
+      openSetup();
+    }
     return null;}
   if(!GIST_ID_RE.test(gist)){
     openSetup();
@@ -357,6 +418,7 @@ async function readScheduleFile(file){
   return data;
 }
 async function sync(){
+  if(HAS_RENDERED)setSyncStatus("Showing the saved schedule while checking for updates…","warn","…");
   try{
     const g=await gistFetch();if(!g)return;
     const f=g.files&&g.files["peptidedata.json"];
@@ -364,8 +426,18 @@ async function sync(){
     const data=await readScheduleFile(f);
     LS.set("pep_data",JSON.stringify(data));
     render(sanitizeForRender(data));
-    banner("Updated "+(data.built||""),"ok");
-  }catch(e){banner("Sync failed: "+e.message+" — showing last saved","err");}
+    setSyncStatus("Online · Schedule updated "+(data.built||"recently")+".","ok","✓");
+    banner("Schedule is up to date.","ok");
+  }catch(e){
+    if(HAS_RENDERED){
+      setSyncStatus((navigator.onLine?"Could not check for updates":"Offline")+" · Showing "+savedScheduleText()+". Completions still save on this device.","err","!");
+      banner("Could not refresh the schedule. The saved copy is still available.","err");
+    }else{
+      setLoading(true,"The schedule could not be loaded. Check your connection, then try Setup again.");
+      setSyncStatus("No saved schedule is available on this device.","err","!");
+      banner("Could not load the schedule: "+e.message,"err");
+    }
+  }
 }
 
 const check=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>`;
@@ -377,7 +449,8 @@ let DATA=null, todays=[];
 function render(D){
   DATA=D;
   const COMPOUNDS=Array.isArray(D.compounds)?D.compounds:[],WEEKLY=D.weekly||{},EVENTS=D.events||{},TIMELINE=Array.isArray(D.timeline)?D.timeline:[],SITES=Array.isArray(D.sites)?D.sites.slice(0,6):[],WED=Array.isArray(D.wed)?D.wed:[],INV=D.inventory||{active:[],powder:[],discarded:[]};
-  document.getElementById("foot").textContent="Data built "+(D.built||"—")+" · logs & sites saved only on this device";
+  LAST_BUILT=D.built||"";
+  document.getElementById("foot").textContent="Schedule last updated "+(D.built||"—")+" · completions and injection-site history stay on this device";
 
   /* today's doses (injectables, excl PRN) */
   todays=[];
@@ -410,37 +483,45 @@ function render(D){
   /* inventory */
   /* Vial rows are tappable: they load the calculator with that vial's own recipe.
      Inventory changes are never written from the browser. */
-  const invRow=(c,tr,tap)=>`<div class="row${tap?" tapvial":""}"${tap?` data-vial="${c.key}"`:""}>${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">${c.line2||""}</div></div>${tr}</div>`;
+  const invMark=c=>c.tone==="g"?"✓":c.tone==="a"?"⚠":c.tone==="r"?"⛔":"○";
+  const invRow=(c,tr,tap)=>`<div class="row${tap?" tapvial":""}"${tap?` data-vial="${c.key}" role="button" tabindex="0" aria-label="${c.name}. ${c.line2||""}. Open saved calculator values."`:""}>${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">${c.line2||""}</div></div>${tr}</div>`;
   let ih="";
-  if(INV.active.length)ih+=`<div class="grp">Active</div>`+INV.active.map(c=>invRow(c,`<div class="chip2 ${c.tone}">${c.chip}</div>`,true)).join("");
-  if(INV.powder.length)ih+=`<div class="grp">Backup stock</div>`+INV.powder.map(c=>invRow(c,`<div class="chip2 n">${c.chip}</div>`,!c.supply)).join("");
-  if(INV.discarded.length)ih+=`<div class="grp">Archive</div>`+INV.discarded.map(c=>`<div class="row arch">${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">Discarded</div></div></div>`).join("");
+  if(INV.active.length)ih+=`<div class="grp">Active vials</div>`+INV.active.map(c=>invRow(c,`<div class="chip2 ${c.tone}">${invMark(c)} ${c.chip}</div>`,true)).join("");
+  if(INV.powder.length)ih+=`<div class="grp">Unmixed backup stock</div>`+INV.powder.map(c=>invRow(c,`<div class="chip2 n">○ ${c.chip}</div>`,!c.supply)).join("");
+  if(INV.discarded.length)ih+=`<div class="grp">Discarded / archived</div>`+INV.discarded.map(c=>`<div class="row arch">${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">⛔ Discarded and kept only for history</div></div></div>`).join("");
   document.getElementById("inventory").innerHTML=ih||'<div class="row"><div class="meta"><div class="sub">No inventory</div></div></div>';
   VIALS=Object.create(null);[...INV.active,...INV.powder].forEach(c=>{if(c.key&&!VIALS[c.key])VIALS[c.key]=c;});
-  document.getElementById("inventory").querySelectorAll(".tapvial").forEach(r=>
-    r.onclick=()=>vialSheet(r.dataset.vial));
+  document.getElementById("inventory").querySelectorAll(".tapvial").forEach(r=>{
+    r.onclick=()=>vialSheet(r.dataset.vial);
+    r.onkeydown=ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();vialSheet(r.dataset.vial);}};
+  });
 
   /* research library (view-only) */
   const RESEARCH=D.research||[];
-  const rmeta={active:["Active","g"],backup:["Backup","n"],retired:["Retired","r"],reference:["Reference","n"]};
+  const rmeta={active:["Current inventory","g"],backup:["Backup inventory","n"],retired:["Archived","r"],reference:["Research reference","n"]};
   const rc=document.getElementById("research");
   if(rc){
     const chev=`<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>`;
     const rd=(lbl,v)=>v?`<div class="rd"><span class="rdl">${lbl}</span>${v}</div>`:"";
     const grp=(lbl,arr)=>arr.length?`<div class="grp">${lbl}</div>`+arr.map(x=>{
       const sm=rmeta[x.status]||["Reference","n"];
-      const meta=(x.date?("Researched "+x.date):"Not yet researched")+(x.evidence?" · "+x.evidence:"");
+      const meta=(x.date?("Reviewed "+x.date):"Not reviewed yet")+(x.evidence?" · Evidence note: "+x.evidence:" · Evidence level not recorded");
       const d=x.detail||{};
-      const body=(x.summary?`<div class="rd rdsum">${x.summary}</div>`:"")+rd("What it is",d.uses)+rd("Timing",d.timing)+rd("Dosing",d.dosing)+rd("Safety",d.safety);
-      return `<div class="rx"><div class="row rxh"><div class="ic" style="background:${safeColor(x.color)}"><span class="mn">${x.mono||"·"}</span></div><div class="meta"><div class="nm">${x.name}</div><div class="sub">${meta}</div></div><div class="chip2 ${sm[1]}">${sm[0]}</div>${chev}</div><div class="rxd">${body||'<div class="rd">No extra detail yet.</div>'}</div></div>`;
+      const body=(x.summary?`<div class="rd rdsum">Summary of available notes: ${x.summary}</div>`:"")+rd("Possible uses described in sources",d.uses)+rd("Reported timing",d.timing)+rd("Reported dosing — not a recommendation",d.dosing)+rd("Safety notes and uncertainty",d.safety);
+      return `<div class="rx"><div class="row rxh" role="button" tabindex="0" aria-expanded="false"><div class="ic" style="background:${safeColor(x.color)}"><span class="mn">${x.mono||"·"}</span></div><div class="meta"><div class="nm">${x.name}</div><div class="sub">${meta}</div></div><div class="chip2 ${sm[1]}">${sm[0]}</div>${chev}</div><div class="rxd">${body||'<div class="rd">No additional notes are available yet.</div>'}</div></div>`;
     }).join(""):"";
     const rrank={active:0,backup:1,reference:2,retired:3};
     const researched=RESEARCH.filter(x=>x.date).slice().sort((a,b)=>(rrank[a.status]??9)-(rrank[b.status]??9)), pending=RESEARCH.filter(x=>!x.date);
-    rc.innerHTML=(grp("Researched",researched)+grp("Not yet researched",pending))||'<div class="row"><div class="meta"><div class="sub">No research yet</div></div></div>';
-    rc.querySelectorAll(".rxh").forEach(h=>h.onclick=()=>h.parentElement.classList.toggle("open"));
+    rc.innerHTML=(grp("Reviewed notes",researched)+grp("Not reviewed yet",pending))||'<div class="row"><div class="meta"><div class="sub">No research notes are available.</div></div></div>';
+    rc.querySelectorAll(".rxh").forEach(h=>{
+      const toggle=()=>{const open=h.parentElement.classList.toggle("open");h.setAttribute("aria-expanded",String(open));};
+      h.onclick=toggle;h.onkeydown=ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();toggle();}};
+    });
   }
 
   buildCalendar(EVENTS,TIMELINE,D.months);
+  HAS_RENDERED=true;
+  setLoading(false);
 }
 
 /* ---- vial-state warning shown under a dose on the Today card ---- */
@@ -458,24 +539,38 @@ function vialWarn(c){
    Inventory writes are made in the private source repository. The public browser
    never receives a GitHub credential and cannot modify the delivery Gist. */
 let VIALS=Object.create(null);
+let sheetReturnFocus=null;
+function closeActionSheet(){
+  document.getElementById("asksheet").classList.remove("show");
+  if(sheetReturnFocus&&sheetReturnFocus.isConnected)sheetReturnFocus.focus();
+  sheetReturnFocus=null;
+}
+function openActionSheet(title,subtitle,actions){
+  sheetReturnFocus=document.activeElement;
+  document.getElementById("ask-ttl").textContent=title;
+  document.getElementById("ask-sub").textContent=subtitle;
+  const box=document.getElementById("ask-opts");
+  box.innerHTML=actions.map(a=>`<button type="button" class="asksheet-opt">${htmlSafe(a.label)}</button>`).join("");
+  box.querySelectorAll("button").forEach((b,i)=>b.onclick=()=>{closeActionSheet();actions[i].run();});
+  const sheet=document.getElementById("asksheet");
+  document.getElementById("ask-cancel").onclick=closeActionSheet;
+  sheet.onclick=ev=>{if(ev.target===sheet)closeActionSheet();};
+  sheet.classList.add("show");
+  setTimeout(()=>box.querySelector("button")?.focus(),0);
+}
+document.addEventListener("keydown",ev=>{
+  if(ev.key==="Escape"&&document.getElementById("asksheet").classList.contains("show"))closeActionSheet();
+});
 function vialSheet(key){
   const v=VIALS[key];if(!v)return;
-  document.getElementById("ask-ttl").textContent=v.name;
-  document.getElementById("ask-sub").textContent=v.line2||"";
   const opts=[];
-  if(v.calc&&v.calc.mg)opts.push(["Open calculator for this vial",()=>{
+  if(v.calc&&v.calc.mg)opts.push({label:"Open saved values in calculator",run:()=>{
     document.getElementById("c-mg").value=v.calc.mg;
     if(v.calc.ml)document.getElementById("c-ml").value=v.calc.ml;
     if(v.calc.dose)document.getElementById("c-dose").value=v.calc.dose;
-    calc();document.getElementById("c-mg").scrollIntoView({behavior:"smooth",block:"center"});}]);
+    calc();document.getElementById("c-mg").scrollIntoView({behavior:"smooth",block:"center"});}});
   if(!opts.length){banner("No calculator recipe is available for this vial","err");return;}
-  const box=document.getElementById("ask-opts");
-  box.innerHTML=opts.map(o=>`<button class="asksheet-opt">${o[0]}</button>`).join("");
-  const sheet=document.getElementById("asksheet"),close=()=>sheet.classList.remove("show");
-  box.querySelectorAll("button").forEach((b,i)=>b.onclick=()=>{opts[i][1]();close();});
-  document.getElementById("ask-cancel").onclick=close;
-  sheet.onclick=(ev)=>{if(ev.target===sheet)close();};
-  sheet.classList.add("show");
+  openActionSheet(v.name,v.line2||"Saved vial details",opts);
 }
 /* ---- co-draw: compounds sharing a syringe are ONE physical injection ----------
    BPC-157 + KPV used to be two checkboxes for one shot. Merge them into a single
@@ -525,6 +620,39 @@ function writeDay(mut){
              complete:!partial&&total>0&&settled(e)>=total};
   jset(DAYLOG,dl);
 }
+function localLogSnapshot(){
+  return {day:LS.get(DAYLOG,""),site:LS.get(SITELOG,"")};
+}
+function restoreLocalLogs(snapshot){
+  snapshot.day?LS.set(DAYLOG,snapshot.day):LS.remove(DAYLOG);
+  snapshot.site?LS.set(SITELOG,snapshot.site):LS.remove(SITELOG);
+}
+function askCompletion(key,prn){
+  const item=todays.find(c=>c.key===key);if(!item)return;
+  const isDone=dayEntry(TODAY).done.includes(key);
+  if(isDone){
+    openActionSheet("Remove completed mark for "+item.name+"?","The item will return to today’s list as not completed.",[
+      {label:"Remove completed mark",run:()=>{
+        const before=localLogSnapshot();
+        writeDay(e=>{const i=e.done.indexOf(key);if(i>=0)e.done.splice(i,1);});
+        renderToday(prn);
+        banner("Completed mark removed for "+item.name+".","ok","Undo",()=>{restoreLocalLogs(before);renderToday(prn);});
+      }}
+    ]);
+    return;
+  }
+  openActionSheet("Mark "+item.name+" complete?","Confirm only after you have completed this scheduled item. This record stays on this device.",[
+    {label:"Mark complete",run:()=>{
+      const before=localLogSnapshot();
+      writeDay(e=>{if(!e.done.includes(key))e.done.push(key);delete e.skip[key];});
+      const siteAdded=autoSite(true);
+      renderToday(prn);
+      banner("Marked "+item.name+" complete"+(siteAdded?" and logged the suggested site":"")+".","ok","Undo",()=>{
+        restoreLocalLogs(before);renderToday(prn);if(DATA&&DATA.sites)renderSites(DATA.sites);
+      });
+    }}
+  ]);
+}
 
 /* ---- Today: doses + ring + streak + week ---- */
 function renderToday(prn){
@@ -537,7 +665,7 @@ function renderToday(prn){
     const subs=(c.sub||[]).length>1
       ?(c.sub||[]).map(x=>`<span class="subpill">${x.name} · ${x.dose} · ${x.units}u</span>`).join(""):"";
     return `<div class="row${cls}" data-k="${c.key}">
-      <div class="chk">${check}</div>${icon(c)}
+      <button type="button" class="chk" aria-pressed="${isDone}" aria-label="${isDone?"Remove completed mark for":"Mark"} ${c.name}${isDone?"": " complete"}">${check}</button>${icon(c)}
       <div class="meta"><div class="nm">${c.name}</div>
         <div class="sub">${c.when}${c.note?" · "+c.note:""}</div>
         ${subs?`<div class="subrow">${subs}</div>`:""}
@@ -548,15 +676,8 @@ function renderToday(prn){
     </div>`;}).join("")
     +(prn||[]).map(c=>`<div class="row opt">${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">As needed · ${c.dose}</div></div><div class="val">PRN</div></div>`).join("");
 
-  tl.querySelectorAll(".row[data-k]").forEach(r=>{
-    r.onclick=(ev)=>{
-      if(ev.target.closest(".skipbtn"))return;
-      const k=r.dataset.k;
-      writeDay(e=>{const i=e.done.indexOf(k);
-        if(i>=0)e.done.splice(i,1); else {e.done.push(k);delete e.skip[k];}});
-      if((jget(DAYLOG)[TODAY].done||[]).includes(k))autoSite();
-      renderToday(prn);
-    };
+  tl.querySelectorAll(".row[data-k] .chk").forEach(b=>{
+    b.onclick=()=>askCompletion(b.closest(".row").dataset.k,prn);
   });
   tl.querySelectorAll(".skipbtn").forEach(b=>{
     b.onclick=(ev)=>{ev.stopPropagation();askSkip(b.dataset.skip,()=>renderToday(prn));};
@@ -569,19 +690,14 @@ function renderToday(prn){
 function askSkip(key,after){
   const reasons=(DATA&&DATA.skip_reasons)||["Ate too late to fast","Travelling","Out of vial / expired","Other"];
   const item=todays.find(c=>c.key===key)||{name:"this dose"};
-  document.getElementById("ask-ttl").textContent="Skip "+item.name+"?";
-  document.getElementById("ask-sub").textContent="Logged as a planned skip, not a miss — your streak survives.";
-  const box=document.getElementById("ask-opts");
-  box.innerHTML=reasons.map(r=>`<button class="asksheet-opt">${r}</button>`).join("");
-  box.querySelectorAll("button").forEach((b,i)=>b.onclick=()=>{
-    writeDay(e=>{const j=e.done.indexOf(key);if(j>=0)e.done.splice(j,1);e.skip[key]=reasons[i];});
-    close();after&&after();
-  });
-  const sheet=document.getElementById("asksheet");
-  const close=()=>sheet.classList.remove("show");
-  document.getElementById("ask-cancel").onclick=close;
-  sheet.onclick=(ev)=>{if(ev.target===sheet)close();};
-  sheet.classList.add("show");
+  openActionSheet("Skip "+item.name+"?","Choose why this planned item is being skipped. The reason stays on this device.",reasons.map(reason=>({
+    label:reason,run:()=>{
+      const before=localLogSnapshot();
+      writeDay(e=>{const j=e.done.indexOf(key);if(j>=0)e.done.splice(j,1);e.skip[key]=reason;});
+      after&&after();
+      banner(item.name+" marked as a planned skip.","ok","Undo",()=>{restoreLocalLogs(before);after&&after();});
+    }
+  })));
 }
 
 /* ---- "next up" line: the most time-sensitive vial action, on the Today card ---- */
@@ -632,12 +748,13 @@ const ZPOS=[[82,118],[118,118],[64,104],[136,104],[82,190],[118,190]];
 let SUGGESTED_SITE=0;
 /* Marking a dose done also logs the suggested site, so rotation stops being a
    separate chore you remember 11 days out of 28. Tap the map to correct it. */
-function autoSite(){
+function autoSite(quiet=false){
   const sl=jget(SITELOG);
-  if((sl[TODAY]||[]).length)return;                 // already logged today
+  if((sl[TODAY]||[]).length)return false;                 // already logged today
   sl[TODAY]=[SUGGESTED_SITE];jset(SITELOG,sl);
   if(DATA&&DATA.sites)renderSites(DATA.sites);
-  banner("Site logged: "+((DATA&&DATA.sites&&DATA.sites[SUGGESTED_SITE])||"")+" — tap the map to change","ok");
+  if(!quiet)banner("Site logged: "+((DATA&&DATA.sites&&DATA.sites[SUGGESTED_SITE])||"")+" — tap the map to change","ok");
+  return true;
 }
 function renderSites(SITES){
   const sl=jget(SITELOG);const todayUsed=new Set(sl[TODAY]||[]);
@@ -647,11 +764,14 @@ function renderSites(SITES){
   for(let i=0;i<SITES.length;i++){const lu=last[i]!==undefined?last[i]:"0000";if(lu<best){best=lu;sug=i;}}
   SUGGESTED_SITE=sug;
   const g=document.getElementById("zones");
-  g.innerHTML=SITES.map((s,i)=>`<circle class="zone${todayUsed.has(i)?' used':''}${i===sug?' sug':''}" data-z="${i}" cx="${ZPOS[i][0]}" cy="${ZPOS[i][1]}" r="13"/>`).join("");
-  g.querySelectorAll(".zone").forEach(z=>z.onclick=()=>{
-    const i=+z.dataset.z, sl=jget(SITELOG), arr=new Set(sl[TODAY]||[]);
+  g.innerHTML=SITES.map((s,i)=>`<g class="zonebtn" data-z="${i}" role="button" tabindex="0" aria-label="${s}${todayUsed.has(i)?", logged today":""}${i===sug?", suggested next":""}"><circle class="zone-hit" cx="${ZPOS[i][0]}" cy="${ZPOS[i][1]}" r="22"/><circle class="zone${todayUsed.has(i)?' used':''}${i===sug?' sug':''}" cx="${ZPOS[i][0]}" cy="${ZPOS[i][1]}" r="13"/></g>`).join("");
+  g.querySelectorAll(".zonebtn").forEach(z=>{
+    const toggle=()=>{
+      const i=+z.dataset.z, sl=jget(SITELOG), arr=new Set(sl[TODAY]||[]);
     arr.has(i)?arr.delete(i):arr.add(i);
     sl[TODAY]=[...arr];jset(SITELOG,sl);renderSites(SITES);
+    };
+    z.onclick=toggle;z.onkeydown=ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();toggle();}};
   });
   document.getElementById("site-sug").innerHTML=`Suggested next: <b>${SITES[sug]||"—"}</b>`;
   const used=[...todayUsed].map(i=>SITES[i]).join(", ");
@@ -679,15 +799,23 @@ function drawCal(){
   let h="<table><thead><tr>"+DOW.map(d=>`<th>${d[0]}</th>`).join("")+"</tr></thead><tbody><tr>";let col=0;
   for(let i=0;i<lead;i++){h+="<td class='out'>.</td>";col++;}
   for(let dn=1;dn<=days;dn++){if(col===7){h+="</tr><tr>";col=0;}
-    const k=`${y}-${pad(m+1)}-${pad(dn)}`;const e=CAL_EVENTS[k];let dots="";
-    if(e&&e.reta)dots+="<span class='dot r'></span>";if(e&&e.tw)dots+="<span class='dot tw'></span>";if(e&&e.evt)dots+="<span class='dot e'></span>";if(CAL_REMIX.has(k))dots+="<span class='dot m'></span>";
+    const k=`${y}-${pad(m+1)}-${pad(dn)}`;const e=CAL_EVENTS[k];let dots="",labels=[];
+    if(e&&e.reta){dots+="<i class='dot r' aria-hidden='true'>R</i>";labels.push("Reta");}
+    if(e&&e.tw){dots+="<i class='dot tw' aria-hidden='true'>T</i>";labels.push("TB-500");}
+    if(e&&e.evt){dots+="<i class='dot e' aria-hidden='true'>C</i>";labels.push("change");}
+    if(CAL_REMIX.has(k)){dots+="<i class='dot m' aria-hidden='true'>M</i>";labels.push("re-mix");}
     const en=dl[k];let lc="";const _sk=en&&en.skip?Object.keys(en.skip).length:0;
     if(en&&(en.complete||((en.total||0)>0&&(en.done||[]).length+_sk>=en.total)))lc=" logged";
     else if(en&&((en.done||[]).length||_sk))lc=" partial";
-    h+=`<td data-k="${k}" class="${k===TODAY?'today':''}${lc}"><span class="dn">${dn}</span><div class="dots">${dots}</div></td>`;col++;}
+    const state=lc===" logged"?"<span class='daystate' aria-hidden='true'>✓</span>":lc===" partial"?"<span class='daystate' aria-hidden='true'>•</span>":"";
+    const aria=`${MON[m]} ${dn}${labels.length?", "+labels.join(", "):", no special event"}${lc===" logged"?", completed":lc===" partial"?", partly completed":""}`;
+    h+=`<td data-k="${k}" role="button" tabindex="0" aria-label="${aria}" class="${k===TODAY?'today':''}${lc}"><span class="dn">${dn}</span>${state}<div class="dots">${dots}</div></td>`;col++;}
   while(col<7){h+="<td class='out'>.</td>";col++;}h+="</tr></tbody></table>";
   document.getElementById("calbody").innerHTML=h;
-  document.getElementById("calbody").querySelectorAll("td[data-k]").forEach(td=>td.onclick=()=>showCalDay(td.dataset.k));
+  document.getElementById("calbody").querySelectorAll("td[data-k]").forEach(td=>{
+    td.onclick=()=>showCalDay(td.dataset.k);
+    td.onkeydown=ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();showCalDay(td.dataset.k);}};
+  });
   if(months[cur][1]===_now.getFullYear()&&months[cur][2]===_now.getMonth())showCalDay(TODAY);
   else document.getElementById("calday").textContent="Tap a day to see what's on it.";
 }
@@ -713,20 +841,35 @@ function showCalDay(k){
   if(CAL_REMIX.has(k))parts.push("Re-mix a fresh vial");
   const dl=jget(DAYLOG),en=dl[k];let status="";
   const nsk=en&&en.skip?Object.keys(en.skip).length:0;
-  if(en&&en.complete)status=" · ✓ Logged"+(nsk?` (${nsk} planned skip${nsk>1?"s":""})`:"");
+  if(en&&en.complete)status=" · ✓ Completed"+(nsk?` (${nsk} planned skip${nsk>1?"s":""})`:"");
   else if(en&&((en.done||[]).length||nsk))
-    status=` · ${(en.done||[]).length}/${en.total||"?"} logged`+(nsk?`, ${nsk} skipped`:"");
+    status=` · ${(en.done||[]).length}/${en.total||"?"} completed`+(nsk?`, ${nsk} skipped`:"");
   const d=new Date(k+"T00:00"),lbl=DOW[d.getDay()]+", "+MON[d.getMonth()]+" "+d.getDate();
   const head=parts.length?`<b>${lbl}</b> — ${parts.join(" · ")}${status}`:`<b>${lbl}</b> — nothing scheduled${status}`;
   let action="";
-  if(k<=TODAY)action=(en&&en.complete)?` · <a class="caltog" onclick="toggleDayLog('${k}')">clear log</a>`:` · <a class="caltog" onclick="toggleDayLog('${k}')">mark logged</a>`;
-  document.getElementById("calday").innerHTML=head+action;
+  if(k<=TODAY)action=(en&&en.complete)?` <button type="button" class="caltog">Remove day completion</button>`:` <button type="button" class="caltog">Mark whole day complete</button>`;
+  const out=document.getElementById("calday");out.innerHTML=head+action;
+  out.querySelector(".caltog")?.addEventListener("click",()=>confirmDayLog(k,lbl));
 }
 function toggleDayLog(k){
   const dl=jget(DAYLOG),en=dl[k];
   if(en&&en.complete)delete dl[k];else dl[k]={done:[0],total:1,complete:true};
   jset(DAYLOG,dl);
   drawCal();showCalDay(k);
+}
+function confirmDayLog(k,label){
+  const en=dayEntry(k),isDone=en.complete;
+  const title=isDone?"Remove completion for "+label+"?":"Mark all of "+label+" complete?";
+  const subtitle=isDone
+    ?"This removes the whole-day completion record from this device."
+    :"Use this only if the whole day was completed. It does not record individual items.";
+  openActionSheet(title,subtitle,[{label:isDone?"Remove day completion":"Mark whole day complete",run:()=>{
+    const before=localLogSnapshot();
+    toggleDayLog(k);
+    banner(isDone?"Day completion removed.":"Whole day marked complete.","ok","Undo",()=>{
+      restoreLocalLogs(before);drawCal();showCalDay(k);
+    });
+  }}]);
 }
 
 /* ---- Reconstitution calculator ---- */
@@ -741,7 +884,11 @@ function calc(){
 calc();
 
 /* ---- setup + tabs ---- */
-function openSetup(){document.getElementById("in-gist").value=LS.get("pep_gist","");document.getElementById("overlay").classList.add("show");}
+function openSetup(){
+  document.getElementById("in-gist").value=LS.get("pep_gist","");
+  document.getElementById("overlay").classList.add("show");
+  setTimeout(()=>document.getElementById("in-gist").focus(),0);
+}
 document.getElementById("gear").onclick=openSetup;
 document.getElementById("cancel").onclick=()=>document.getElementById("overlay").classList.remove("show");
 document.getElementById("save").onclick=()=>{
@@ -752,16 +899,33 @@ document.getElementById("save").onclick=()=>{
   sync();
 };
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
-  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));t.classList.add("on");
+  document.querySelectorAll(".tab").forEach(x=>{x.classList.remove("on");x.removeAttribute("aria-current");});
+  t.classList.add("on");t.setAttribute("aria-current","page");
   document.querySelectorAll(".view").forEach(v=>{v.hidden=(v.id!==t.dataset.v);});
   window.scrollTo({top:0,behavior:"smooth"});
+});
+window.addEventListener("offline",()=>{
+  if(HAS_RENDERED)setSyncStatus("Offline · Showing "+savedScheduleText()+". Completions still save on this device.","err","!");
+  else setSyncStatus("Offline · No saved schedule is available on this device.","err","!");
+});
+window.addEventListener("online",()=>{
+  setSyncStatus("Back online · Checking for schedule updates…","warn","…");
+  sync();
 });
 
 /* ---- boot ---- */
 LS.remove("pep_token");                 // remove any credential stored by older releases
 if(location.hash)history.replaceState(null,"",location.pathname+location.search);
 const cached=LS.get("pep_data");
-if(cached){try{render(sanitizeForRender(JSON.parse(cached)));}catch(e){}}
+if(cached){
+  try{
+    render(sanitizeForRender(JSON.parse(cached)));
+    setSyncStatus((navigator.onLine?"Showing the saved schedule while checking for updates…":"Offline · Showing "+savedScheduleText()+". Completions still save on this device."),navigator.onLine?"warn":"err",navigator.onLine?"…":"!");
+  }catch(e){
+    setLoading(true,"Saved schedule data could not be read. Open Setup to try again.");
+    setSyncStatus("No readable saved schedule is available on this device.","err","!");
+  }
+}
 sync();
 </script>
 </body>
