@@ -408,15 +408,15 @@ function render(D){
   }).join("")||'<div class="ag"><div class="meta"><div class="sub">No upcoming items</div></div></div>';
 
   /* inventory */
-  /* Vial rows are tappable: they load the calculator with that vial's own recipe and
-     offer "I re-mixed this today", which writes back to inventory.xlsx via the gist. */
+  /* Vial rows are tappable: they load the calculator with that vial's own recipe.
+     Inventory changes are never written from the browser. */
   const invRow=(c,tr,tap)=>`<div class="row${tap?" tapvial":""}"${tap?` data-vial="${c.key}"`:""}>${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">${c.line2||""}</div></div>${tr}</div>`;
   let ih="";
   if(INV.active.length)ih+=`<div class="grp">Active</div>`+INV.active.map(c=>invRow(c,`<div class="chip2 ${c.tone}">${c.chip}</div>`,true)).join("");
   if(INV.powder.length)ih+=`<div class="grp">Backup stock</div>`+INV.powder.map(c=>invRow(c,`<div class="chip2 n">${c.chip}</div>`,!c.supply)).join("");
   if(INV.discarded.length)ih+=`<div class="grp">Archive</div>`+INV.discarded.map(c=>`<div class="row arch">${icon(c)}<div class="meta"><div class="nm">${c.name}</div><div class="sub">Discarded</div></div></div>`).join("");
   document.getElementById("inventory").innerHTML=ih||'<div class="row"><div class="meta"><div class="sub">No inventory</div></div></div>';
-  VIALS={};[...INV.active,...INV.powder].forEach(c=>{if(c.key&&!VIALS[c.key])VIALS[c.key]=c;});
+  VIALS=Object.create(null);[...INV.active,...INV.powder].forEach(c=>{if(c.key&&!VIALS[c.key])VIALS[c.key]=c;});
   document.getElementById("inventory").querySelectorAll(".tapvial").forEach(r=>
     r.onclick=()=>vialSheet(r.dataset.vial));
 
