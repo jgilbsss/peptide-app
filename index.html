@@ -273,9 +273,9 @@ details.proto[open]>summary::after{transform:rotate(90deg)}
 </div></div>
 <div class="overlay" id="overlay"><div class="glass sheet">
   <h2>Setup</h2>
-  <p>Your data loads automatically from your private gist. A token is optional. Everything stays on this device.</p>
-  <label>Gist ID</label><input id="in-gist" type="text" placeholder="e.g. a1b2c3d4…" autocomplete="off">
-  <label>GitHub token (optional)</label><input id="in-token" type="password" placeholder="leave blank if unsure" autocomplete="off">
+  <p>Schedule data is downloaded read-only from an unlisted GitHub Gist and cached on this device. Dose and site logs recorded by this version stay only in this browser and are not uploaded. Anyone with the Gist ID can read the schedule.</p>
+  <p>For security, this app no longer accepts or stores GitHub access tokens. Revoke any token previously entered here.</p>
+  <label for="in-gist">Gist ID</label><input id="in-gist" type="text" placeholder="e.g. a1b2c3d4…" autocomplete="off" autocapitalize="off" spellcheck="false">
   <div class="btns"><button class="cancel" id="cancel">Cancel</button><button class="save" id="save">Save &amp; Sync</button></div>
 </div></div>
 
@@ -284,7 +284,32 @@ const pad=n=>String(n).padStart(2,"0");
 const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-const LS={get(k,d){try{return localStorage.getItem(k)??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const LS={
+  get(k,d){try{return localStorage.getItem(k)??d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,v)}catch(e){}},
+  remove(k){try{localStorage.removeItem(k)}catch(e){}}
+};
+const GIST_ID_RE=/^[0-9a-f]{16,64}$/i;
+const htmlSafe=value=>String(value??"").replace(/[&<>"']/g,ch=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+})[ch]);
+function sanitizeForRender(value,depth=0){
+  if(depth>8)return null;
+  if(Array.isArray(value))return value.slice(0,500).map(item=>sanitizeForRender(item,depth+1));
+  if(value&&typeof value==="object"){
+    const out={};let count=0;
+    for(const [key,item] of Object.entries(value)){
+      if(++count>500||key==="__proto__"||key==="prototype"||key==="constructor")continue;
+      out[htmlSafe(String(key).slice(0,200))]=sanitizeForRender(item,depth+1);
+    }
+    return out;
+  }
+  if(typeof value==="string")return htmlSafe(value.slice(0,20000));
+  if(typeof value==="number")return Number.isFinite(value)?value:null;
+  if(typeof value==="boolean"||value===null)return value;
+  return null;
+}
+const safeColor=value=>/^#[0-9a-f]{6}$/i.test(String(value||""))?String(value):"#8a8a8e";
 const _now=new Date();const TODAY=iso(_now);
 document.getElementById("todaydate").textContent=DOW[_now.getDay()]+", "+MON[_now.getMonth()]+" "+_now.getDate();
 function banner(m,c){const b=document.getElementById("banner");b.textContent=m;b.className="banner show "+c;if(c==="ok")setTimeout(()=>b.className="banner",2200);}
@@ -294,71 +319,65 @@ const jget=(k)=>{try{return JSON.parse(LS.get(k,"{}"))}catch(e){return {}}};
 const jset=(k,o)=>LS.set(k,JSON.stringify(o));
 const DAYLOG="pep_daylog", SITELOG="pep_sitelog";
 
-/* gist sync (token optional) */
+/* Read-only Gist sync. Browser credentials are never accepted or stored. */
 async function gistFetch(){
-  const token=LS.get("pep_token"),gist=LS.get("pep_gist");
+  const gist=LS.get("pep_gist","");
   if(!gist){
     /* Only demand setup on a genuine first run. If there is cached data, show it
        and say so quietly instead of blocking the whole app behind a modal. */
     if(LS.get("pep_data"))banner("Offline — showing last saved data","err");
     else openSetup();
     return null;}
-  const headers={Accept:"application/vnd.github+json"};
-  if(token)headers.Authorization="Bearer "+token;
-  const r=await fetch("https://api.github.com/gists/"+gist+"?t="+Date.now(),{headers,cache:"no-store"});
+  if(!GIST_ID_RE.test(gist)){
+    openSetup();
+    throw new Error("Saved Gist ID is invalid");
+  }
+  const r=await fetch("https://api.github.com/gists/"+gist+"?t="+Date.now(),{
+    headers:{Accept:"application/vnd.github+json"},cache:"no-store"
+  });
   if(!r.ok)throw new Error("GitHub "+r.status);
   return await r.json();
 }
-/* merge remote logs into local — union per day so devices never clobber */
-function mergeLogs(remote){
-  const dl=jget(DAYLOG),sl=jget(SITELOG),rdl=(remote&&remote.daylog)||{},rsl=(remote&&remote.sitelog)||{};
-  for(const k in rdl){const a=dl[k],b=rdl[k];
-    if(!a){dl[k]=b;continue;}
-    const done=[...new Set([...(a.done||[]),...(b.done||[])])];
-    const skip=Object.assign({},b.skip||{},a.skip||{});   // local wins on conflict
-    const total=Math.max(a.total||0,b.total||0);
-    const psize=Math.max(a.psize||0,b.psize||0);
-    dl[k]={done,skip,total,psize,
-           complete:total>0&&(done.length+Object.keys(skip).length)>=total};}
-  for(const k in rsl){sl[k]=[...new Set([...(sl[k]||[]),...(rsl[k]||[])])];}
-  jset(DAYLOG,dl);jset(SITELOG,sl);
-}
-let _pt=null;
-function pushLogs(){if(!LS.get("pep_token"))return;clearTimeout(_pt);_pt=setTimeout(_doPush,800);}
-async function _doPush(){
-  const token=LS.get("pep_token"),gist=LS.get("pep_gist");if(!token||!gist)return;
-  const body={files:{"petlogs.json":{content:JSON.stringify({daylog:jget(DAYLOG),sitelog:jget(SITELOG),updated:new Date().toISOString()})}}};
-  try{await fetch("https://api.github.com/gists/"+gist,{method:"PATCH",headers:{Authorization:"Bearer "+token,Accept:"application/vnd.github+json"},body:JSON.stringify(body)});}catch(e){}
+async function readScheduleFile(file){
+  let text=file&&file.content;
+  if(file&&file.truncated){
+    const raw=new URL(file.raw_url);
+    if(raw.protocol!=="https:"||raw.hostname!=="gist.githubusercontent.com"){
+      throw new Error("Unexpected Gist file URL");
+    }
+    const response=await fetch(raw.href,{cache:"no-store"});
+    if(!response.ok)throw new Error("GitHub raw "+response.status);
+    const length=Number(response.headers.get("content-length")||0);
+    if(length>2000000)throw new Error("Schedule file is too large");
+    text=await response.text();
+  }
+  if(typeof text!=="string"||text.length>2000000)throw new Error("Schedule file is too large");
+  const data=JSON.parse(text);
+  if(!data||Array.isArray(data)||typeof data!=="object")throw new Error("Schedule data is invalid");
+  return data;
 }
 async function sync(){
   try{
     const g=await gistFetch();if(!g)return;
     const f=g.files&&g.files["peptidedata.json"];
     if(!f)throw new Error("peptidedata.json not in gist");
-    const data=JSON.parse(f.truncated?await(await fetch(f.raw_url)).text():f.content);
+    const data=await readScheduleFile(f);
     LS.set("pep_data",JSON.stringify(data));
-    const lf=g.files&&g.files["petlogs.json"];
-    if(lf&&lf.content){try{mergeLogs(JSON.parse(lf.content));}catch(e){}}
-    /* The Mac empties pending.json once it has written the change into inventory.xlsx. */
-    const pf=g.files&&g.files["pending.json"];
-    if(pf&&pf.content){try{const rp=JSON.parse(pf.content);
-      if(!rp.remix||!rp.remix.length)jset("pep_pending",{remix:[]});}catch(e){}}
-    render(data);
-    if(LS.get("pep_token"))pushLogs();   // propagate merged logs back
+    render(sanitizeForRender(data));
     banner("Updated "+(data.built||""),"ok");
   }catch(e){banner("Sync failed: "+e.message+" — showing last saved","err");}
 }
 
 const check=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>`;
-const icon=c=>`<div class="ic" style="background:${c.color}"><span class="mn">${c.mono}</span>${c.units?`<span class="un">${c.units}u</span>`:""}</div>`;
+const icon=c=>`<div class="ic" style="background:${safeColor(c.color)}"><span class="mn">${c.mono}</span>${c.units?`<span class="un">${c.units}u</span>`:""}</div>`;
 const val=c=>c.dose||"";
 
 let DATA=null, todays=[];
 
 function render(D){
   DATA=D;
-  const COMPOUNDS=D.compounds||[],WEEKLY=D.weekly||{},EVENTS=D.events||{},TIMELINE=D.timeline||[],SITES=D.sites||[],WED=D.wed||[],INV=D.inventory||{active:[],powder:[],discarded:[]};
-  document.getElementById("foot").innerHTML="Data built "+(D.built||"—")+" · logs &amp; sites saved on this device";
+  const COMPOUNDS=Array.isArray(D.compounds)?D.compounds:[],WEEKLY=D.weekly||{},EVENTS=D.events||{},TIMELINE=Array.isArray(D.timeline)?D.timeline:[],SITES=Array.isArray(D.sites)?D.sites.slice(0,6):[],WED=Array.isArray(D.wed)?D.wed:[],INV=D.inventory||{active:[],powder:[],discarded:[]};
+  document.getElementById("foot").textContent="Data built "+(D.built||"—")+" · logs & sites saved only on this device";
 
   /* today's doses (injectables, excl PRN) */
   todays=[];
@@ -413,7 +432,7 @@ function render(D){
       const meta=(x.date?("Researched "+x.date):"Not yet researched")+(x.evidence?" · "+x.evidence:"");
       const d=x.detail||{};
       const body=(x.summary?`<div class="rd rdsum">${x.summary}</div>`:"")+rd("What it is",d.uses)+rd("Timing",d.timing)+rd("Dosing",d.dosing)+rd("Safety",d.safety);
-      return `<div class="rx"><div class="row rxh"><div class="ic" style="background:${x.color||'#8a8a8e'}"><span class="mn">${x.mono||"·"}</span></div><div class="meta"><div class="nm">${x.name}</div><div class="sub">${meta}</div></div><div class="chip2 ${sm[1]}">${sm[0]}</div>${chev}</div><div class="rxd">${body||'<div class="rd">No extra detail yet.</div>'}</div></div>`;
+      return `<div class="rx"><div class="row rxh"><div class="ic" style="background:${safeColor(x.color)}"><span class="mn">${x.mono||"·"}</span></div><div class="meta"><div class="nm">${x.name}</div><div class="sub">${meta}</div></div><div class="chip2 ${sm[1]}">${sm[0]}</div>${chev}</div><div class="rxd">${body||'<div class="rd">No extra detail yet.</div>'}</div></div>`;
     }).join(""):"";
     const rrank={active:0,backup:1,reference:2,retired:3};
     const researched=RESEARCH.filter(x=>x.date).slice().sort((a,b)=>(rrank[a.status]??9)-(rrank[b.status]??9)), pending=RESEARCH.filter(x=>!x.date);
@@ -435,11 +454,10 @@ function vialWarn(c){
   return "";
 }
 
-/* ---- vial actions: prefill the calculator, or record a re-mix ------------------
-   Re-mixing used to require opening Excel on the Mac, which is why a KPV re-mix went
-   nine days unrecorded. The phone now queues the change into the gist and the daily
-   Mac job applies it to inventory.xlsx. */
-let VIALS={};
+/* ---- vial actions: calculator only ---------------------------------------------
+   Inventory writes are made in the private source repository. The public browser
+   never receives a GitHub credential and cannot modify the delivery Gist. */
+let VIALS=Object.create(null);
 function vialSheet(key){
   const v=VIALS[key];if(!v)return;
   document.getElementById("ask-ttl").textContent=v.name;
@@ -450,7 +468,7 @@ function vialSheet(key){
     if(v.calc.ml)document.getElementById("c-ml").value=v.calc.ml;
     if(v.calc.dose)document.getElementById("c-dose").value=v.calc.dose;
     calc();document.getElementById("c-mg").scrollIntoView({behavior:"smooth",block:"center"});}]);
-  opts.push(["I re-mixed this today",()=>queueRemix(v)]);
+  if(!opts.length){banner("No calculator recipe is available for this vial","err");return;}
   const box=document.getElementById("ask-opts");
   box.innerHTML=opts.map(o=>`<button class="asksheet-opt">${o[0]}</button>`).join("");
   const sheet=document.getElementById("asksheet"),close=()=>sheet.classList.remove("show");
@@ -459,23 +477,6 @@ function vialSheet(key){
   sheet.onclick=(ev)=>{if(ev.target===sheet)close();};
   sheet.classList.add("show");
 }
-function queueRemix(v){
-  if(!LS.get("pep_token")){banner("Needs a GitHub token in Setup to write back","err");return;}
-  const q=jget("pep_pending");const list=Array.isArray(q.remix)?q.remix:[];
-  list.push({compound:v.name,date:TODAY,at:new Date().toISOString()});
-  jset("pep_pending",{remix:list});
-  pushPending();
-  banner(v.name+" re-mix queued — applied on the next Mac sync","ok");
-}
-async function pushPending(){
-  const token=LS.get("pep_token"),gist=LS.get("pep_gist");if(!token||!gist)return;
-  const body={files:{"pending.json":{content:JSON.stringify(
-    Object.assign({},jget("pep_pending"),{updated:new Date().toISOString()}))}}};
-  try{await fetch("https://api.github.com/gists/"+gist,{method:"PATCH",
-    headers:{Authorization:"Bearer "+token,Accept:"application/vnd.github+json"},
-    body:JSON.stringify(body)});}catch(e){}
-}
-
 /* ---- co-draw: compounds sharing a syringe are ONE physical injection ----------
    BPC-157 + KPV used to be two checkboxes for one shot. Merge them into a single
    tickable dose that still shows both compounds and their unit counts. */
@@ -522,7 +523,7 @@ function writeDay(mut){
   const partial=DATA&&DATA.psize&&total>0&&total<Math.min(DATA.psize,3);
   dl[TODAY]={done:e.done,skip:e.skip,total,psize:(DATA&&DATA.psize)||0,
              complete:!partial&&total>0&&settled(e)>=total};
-  jset(DAYLOG,dl);pushLogs();
+  jset(DAYLOG,dl);
 }
 
 /* ---- Today: doses + ring + streak + week ---- */
@@ -540,7 +541,7 @@ function renderToday(prn){
       <div class="meta"><div class="nm">${c.name}</div>
         <div class="sub">${c.when}${c.note?" · "+c.note:""}</div>
         ${subs?`<div class="subrow">${subs}</div>`:""}
-        ${sk?`<div class="skiptag">Skipped — ${sk}</div>`:""}
+        ${sk?`<div class="skiptag">Skipped — ${htmlSafe(sk)}</div>`:""}
         ${vialWarn(c)}</div>
       <div class="val">${val(c)}</div>
       ${isDone||sk?"":`<button class="skipbtn" data-skip="${c.key}">Skip</button>`}
@@ -637,7 +638,6 @@ function autoSite(){
   sl[TODAY]=[SUGGESTED_SITE];jset(SITELOG,sl);
   if(DATA&&DATA.sites)renderSites(DATA.sites);
   banner("Site logged: "+((DATA&&DATA.sites&&DATA.sites[SUGGESTED_SITE])||"")+" — tap the map to change","ok");
-  pushLogs();
 }
 function renderSites(SITES){
   const sl=jget(SITELOG);const todayUsed=new Set(sl[TODAY]||[]);
@@ -652,7 +652,6 @@ function renderSites(SITES){
     const i=+z.dataset.z, sl=jget(SITELOG), arr=new Set(sl[TODAY]||[]);
     arr.has(i)?arr.delete(i):arr.add(i);
     sl[TODAY]=[...arr];jset(SITELOG,sl);renderSites(SITES);
-    pushLogs();
   });
   document.getElementById("site-sug").innerHTML=`Suggested next: <b>${SITES[sug]||"—"}</b>`;
   const used=[...todayUsed].map(i=>SITES[i]).join(", ");
@@ -726,7 +725,7 @@ function showCalDay(k){
 function toggleDayLog(k){
   const dl=jget(DAYLOG),en=dl[k];
   if(en&&en.complete)delete dl[k];else dl[k]={done:[0],total:1,complete:true};
-  jset(DAYLOG,dl);if(LS.get("pep_token"))pushLogs();
+  jset(DAYLOG,dl);
   drawCal();showCalDay(k);
 }
 
@@ -742,10 +741,16 @@ function calc(){
 calc();
 
 /* ---- setup + tabs ---- */
-function openSetup(){document.getElementById("in-token").value=LS.get("pep_token","");document.getElementById("in-gist").value=LS.get("pep_gist","");document.getElementById("overlay").classList.add("show");}
+function openSetup(){document.getElementById("in-gist").value=LS.get("pep_gist","");document.getElementById("overlay").classList.add("show");}
 document.getElementById("gear").onclick=openSetup;
 document.getElementById("cancel").onclick=()=>document.getElementById("overlay").classList.remove("show");
-document.getElementById("save").onclick=()=>{LS.set("pep_token",document.getElementById("in-token").value.trim());LS.set("pep_gist",document.getElementById("in-gist").value.trim());document.getElementById("overlay").classList.remove("show");sync();};
+document.getElementById("save").onclick=()=>{
+  const gist=document.getElementById("in-gist").value.trim();
+  if(!GIST_ID_RE.test(gist)){banner("Enter a valid GitHub Gist ID","err");return;}
+  LS.set("pep_gist",gist);
+  document.getElementById("overlay").classList.remove("show");
+  sync();
+};
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
   document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));t.classList.add("on");
   document.querySelectorAll(".view").forEach(v=>{v.hidden=(v.id!==t.dataset.v);});
@@ -753,10 +758,10 @@ document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
 });
 
 /* ---- boot ---- */
-const hash=new URLSearchParams(location.hash.slice(1));
-if(hash.get("g"))LS.set("pep_gist",hash.get("g"));
+LS.remove("pep_token");                 // remove any credential stored by older releases
+if(location.hash)history.replaceState(null,"",location.pathname+location.search);
 const cached=LS.get("pep_data");
-if(cached){try{render(JSON.parse(cached));}catch(e){}}
+if(cached){try{render(sanitizeForRender(JSON.parse(cached)));}catch(e){}}
 sync();
 </script>
 </body>
